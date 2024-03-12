@@ -90,8 +90,8 @@ public class Interpreter {
                     return eval(ifte.els, env);
             }
             case Let let -> {
-                typecheck(let.name, new Iden());
-                Binding bin = new Binding((Iden) let.name, eval(let.value, env));
+                typecheck(let.var, new Iden());
+                Binding bin = new Binding((Iden) let.var, eval(let.value, env));
                 Stack<Binding> newEnv = bind(bin, env);
                 return eval(let.body, newEnv);
             }
@@ -158,7 +158,7 @@ public class Interpreter {
 
     private static Expression lookup(Iden iden, Stack<Binding> env) throws NoBindingException {
         for (Binding bin : env)
-            if ((bin.name.value).contentEquals(iden.value))
+            if ((bin.var.value).contentEquals(iden.value))
                 return bin.value;
         throw new NoBindingException("variable '" + iden.value + "' is not bound in scope");
     }

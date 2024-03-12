@@ -3,10 +3,10 @@ package constructs;
 import types.Expression;
 
 public class Let implements Expression {
-    public Expression name, value, body;
+    public Expression var, value, body;
 
-    public void set(Expression name, Expression value, Expression body) {
-        this.name = name;
+    public void set(Expression var, Expression value, Expression body) {
+        this.var = var;
         this.value = value;
         this.body = body;
     }

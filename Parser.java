@@ -82,12 +82,12 @@ public class Parser {
     private static Expression parseLet(Queue<Token> tokens) throws WrongSyntaxException {
         Let let = new Let();
         parseToken(tokens, new Token(TokenType.LET, "Let"));
-        Expression ide = parseExpression(tokens);
+        Expression var = parseExpression(tokens);
         parseToken(tokens, new Token(TokenType.EQ, "="));
         Expression value = parseExpression(tokens);
         parseToken(tokens, new Token(TokenType.IN, "in"));
         Expression body = parseExpression(tokens);
-        let.set(ide, value, body);
+        let.set(var, value, body);
         return let;
     }
 

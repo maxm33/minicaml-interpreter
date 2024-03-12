@@ -1,11 +1,11 @@
 package types;
 
 public class Binding {
-    public Iden name;
+    public Iden var;
     public Expression value;
 
-    public Binding(Iden name, Expression value) {
-        this.name = name;
+    public Binding(Iden var, Expression value) {
+        this.var = var;
         this.value = value;
     }
 }
