@@ -35,10 +35,4 @@ javac Interpreter.java
 java Interpreter <path-to-file>
 ```
 
-<br><br>Run a test program
-
-```
-java Interpreter test/test.javaml
-```
-
-which will calculate factorial of 4.<br>
+Some test programs are available in `test` folder.

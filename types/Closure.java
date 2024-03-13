@@ -12,8 +12,4 @@ public class Closure implements Expression {
         this.body = body;
         this.fenv = fenv;
     }
-
-    public void set(Expression e1, Expression e2, Expression e3) {
-        throw new UnsupportedOperationException("Unimplemented method 'set'");
-    }
 }

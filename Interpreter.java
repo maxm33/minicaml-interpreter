@@ -166,8 +166,8 @@ public class Interpreter {
     public static void main(String[] args)
             throws IllegalTokenException, WrongSyntaxException, ZeroDividerException,
             UnknownCommandException, TypeMismatchException, NoBindingException, IOException {
-        if (args.length != 1) {
-            System.err.println("\nno path was provided.\nUsage: java Interpreter <path-to-javaml-file>");
+        if (args.length < 1) {
+            System.err.println("\nno path was provided.\nUsage: java Interpreter <path-to-file>");
             return;
         }
         String program = Files.readString(Paths.get(args[0]));

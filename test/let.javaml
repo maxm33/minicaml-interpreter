@@ -1,0 +1,6 @@
+Let {
+	var = Fun f -> Op(f * 2)
+	in {
+		Apply(var 10)
+	}
+}

@@ -1,0 +1,9 @@
+Letrec {
+	fact(n) = If (Op(n < 2)) { 
+				then 1 
+				else Op(n * Apply(fact(Op(n - 1))))
+			}
+	in {
+		Apply(fact(4))
+	}
+}

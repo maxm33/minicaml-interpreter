@@ -68,75 +68,67 @@ public class Parser {
     private static Expression parseRec(Queue<Token> tokens) throws WrongSyntaxException {
         Letrec rec = new Letrec();
         parseToken(tokens, new Token(TokenType.REC, "Letrec"));
-        Expression name = parseExpression(tokens);
-        Expression param = parseExpression(tokens);
+        rec.name = parseExpression(tokens);
+        rec.param = parseExpression(tokens);
         parseToken(tokens, new Token(TokenType.EQ, "="));
-        Expression fbody = parseExpression(tokens);
+        rec.fbody = parseExpression(tokens);
         parseToken(tokens, new Token(TokenType.IN, "in"));
-        Expression letbody = parseExpression(tokens);
-        rec.setName(name);
-        rec.set(param, fbody, letbody);
+        rec.letbody = parseExpression(tokens);
         return rec;
     }
 
     private static Expression parseLet(Queue<Token> tokens) throws WrongSyntaxException {
         Let let = new Let();
         parseToken(tokens, new Token(TokenType.LET, "Let"));
-        Expression var = parseExpression(tokens);
+        let.var = parseExpression(tokens);
         parseToken(tokens, new Token(TokenType.EQ, "="));
-        Expression value = parseExpression(tokens);
+        let.value = parseExpression(tokens);
         parseToken(tokens, new Token(TokenType.IN, "in"));
-        Expression body = parseExpression(tokens);
-        let.set(var, value, body);
+        let.body = parseExpression(tokens);
         return let;
     }
 
     private static Expression parseIf(Queue<Token> tokens) throws WrongSyntaxException {
         Ifthenelse ifte = new Ifthenelse();
         parseToken(tokens, new Token(TokenType.IF, "If"));
-        Expression guard = parseExpression(tokens);
+        ifte.guard = parseExpression(tokens);
         parseToken(tokens, new Token(TokenType.THEN, "then"));
-        Expression then = parseExpression(tokens);
+        ifte.then = parseExpression(tokens);
         parseToken(tokens, new Token(TokenType.ELSE, "else"));
-        Expression els = parseExpression(tokens);
-        ifte.set(guard, then, els);
+        ifte.els = parseExpression(tokens);
         return ifte;
     }
 
     private static Expression parseFun(Queue<Token> tokens) throws WrongSyntaxException {
         Function fun = new Function();
         parseToken(tokens, new Token(TokenType.FUN, "Fun"));
-        Expression param = parseExpression(tokens);
+        fun.formalParam = parseExpression(tokens);
         parseToken(tokens, new Token(TokenType.ARROW, "->"));
-        Expression body = parseExpression(tokens);
-        fun.set(param, body, null);
+        fun.body = parseExpression(tokens);
         return fun;
     }
 
     private static Expression parseApply(Queue<Token> tokens) throws WrongSyntaxException {
         Apply app = new Apply();
         parseToken(tokens, new Token(TokenType.APPLY, "Apply"));
-        Expression iden = parseExpression(tokens);
-        Expression param = parseExpression(tokens);
-        app.set(iden, param, null);
+        app.iden = parseExpression(tokens);
+        app.actualParam = parseExpression(tokens);
         return app;
     }
 
     private static Expression parseBinaryOP(Queue<Token> tokens) throws WrongSyntaxException {
         Operation bop = new Operation();
         parseToken(tokens, new Token(TokenType.OP, "Op"));
-        Expression e1 = parseExpression(tokens);
-        Expression op = parseSymbol(tokens);
-        Expression e2 = parseExpression(tokens);
-        bop.set(e1, op, e2);
+        bop.e1 = parseExpression(tokens);
+        bop.op = parseSymbol(tokens);
+        bop.e2 = parseExpression(tokens);
         return bop;
     }
 
     private static Expression parseNot(Queue<Token> tokens) throws WrongSyntaxException {
         Not not = new Not();
         parseToken(tokens, new Token(TokenType.NOT, "Not"));
-        Expression arg = parseExpression(tokens);
-        not.set(arg, null, null);
+        not.arg = parseExpression(tokens);
         return not;
     }
 
