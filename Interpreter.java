@@ -112,12 +112,14 @@ public class Interpreter {
                     case Closure clo -> {
                         if (app.actualParams.size() != clo.params.size())
                             throw new WrongSyntaxException("Apply parameters do not match function in numbers");
+                        @SuppressWarnings("unchecked")
+                        Stack<Binding> extFenv = (Stack<Binding>) clo.fenv.clone();
                         for (Expression param : clo.params) {
                             Expression aVal = eval(app.actualParams.get(i++), env);
                             Binding bin = new Binding((Iden) param, aVal);
-                            clo.fenv = bind(bin, clo.fenv);
+                            extFenv = bind(bin, extFenv);
                         }
-                        return eval(clo.body, clo.fenv);
+                        return eval(clo.body, extFenv);
                     }
                     case RecClosure rec -> {
                         if (app.actualParams.size() != rec.params.size())
