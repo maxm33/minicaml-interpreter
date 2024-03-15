@@ -69,7 +69,8 @@ public class Interpreter {
                         else if (e1 instanceof Int i1 && e2 instanceof Int i2)
                             ret_bool.value = i1.value == i2.value;
                         else
-                            throw new TypeMismatchException("unexpected type passed to operation");
+                            throw new TypeMismatchException(
+                                    "unexpected type '" + e1.getClass().toString() + "' passed to operation '=='");
                         return ret_bool;
                     default:
                         throw new UnknownCommandException("unknown operation '" + ((Symbol) bop.op).value + "'");
