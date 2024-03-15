@@ -9,14 +9,12 @@ However, it is a functional language that offers constructs for control-flow, de
 
 Every program must start with an expression `e`, from which can derive as follows:
 
-```
-e := value | Op e op e | Not e | If e then e else e | Let ide = e in e | Fun ide[16] -> e | Apply ide e[16] ; | Letrec ide ide[16] = e in e
-op := + | - | * | / | & | `|` | > | < | ==
-value := Int | Bool
-Int := [0-9]+
-Bool := true | false
-ide := [a-z]+
-```
+
+**e**&emsp;:=&emsp;**const**&ensp;|&ensp;Op **e** **op** **e**&ensp;|&ensp;Not **e**&ensp;|&ensp;If **e** then **e** else **e**&ensp;|&ensp;Let **ide** = **e** in **e**&ensp;|<br>Fun **ide<sub> 1</sub> ... ide<sub> 16</sub>** -> **e**&ensp;|&ensp;Apply **ide** **e<sub> 1</sub> ... e<sub> 16</sub>** ;&ensp;|&ensp;Letrec **ide** **ide<sub> 1</sub> ... ide<sub> 16</sub>** = **e** in **e** <br>
+**const**&emsp;:=&emsp;`[0-9]+`&emsp;|&emsp;`true`&emsp;|&emsp;`false` <br>
+**op**&emsp;:=&emsp;`+`&emsp;|&emsp;`-`&emsp;|&emsp;`*`&emsp;|&emsp;`/`&emsp;|&emsp;`&`&emsp;|&emsp;`|`&emsp;|&emsp;`>`&emsp;|&emsp;`<`&emsp;|&emsp;`==` <br>
+**ide**&emsp;:=&emsp;`[a-z]+` <br>
+
 
 As in OCaml, functions in MiniCaml are treated as values, so they can be passed as arguments to or returned from other functions, or stored in variables.<br><br>
 _Note: MiniCaml syntax is flexibile when it comes to brackets, precisely ( ) and { }. You can put them wherever you want and they are not mandatory in any case, so that you can use them the way you prefer, such as delimiting guards, scope of blocks and operations, etc..._
