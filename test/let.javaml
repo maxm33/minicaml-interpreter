@@ -1,6 +1,6 @@
 Let {
-	var = Fun f -> Op(f * 2)
+	var = Fun f y -> Op f * y
 	in {
-		Apply(var 10)
+		Apply(var 10 2 ;)
 	}
 }

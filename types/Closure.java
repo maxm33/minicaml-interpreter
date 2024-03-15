@@ -1,14 +1,15 @@
 package types;
 
+import java.util.List;
 import java.util.Stack;
 
 public class Closure implements Expression {
-    public Iden param;
+    public List<Expression> params;
     public Expression body;
     public Stack<Binding> fenv;
 
-    public Closure(Iden param, Expression body, Stack<Binding> fenv) {
-        this.param = param;
+    public Closure(List<Expression> params, Expression body, Stack<Binding> fenv) {
+        this.params = params;
         this.body = body;
         this.fenv = fenv;
     }

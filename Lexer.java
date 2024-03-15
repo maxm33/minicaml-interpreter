@@ -44,8 +44,10 @@ public class Lexer {
                 tokens.add(new Token(TokenType.SYMB, word));
             else if (word.matches("[a-z]+"))
                 tokens.add(new Token(TokenType.IDEN, word));
+            else if (word.contentEquals(";"))
+                tokens.add(new Token(TokenType.END, word));
             else
-                throw new IllegalTokenException("unexpected token '" + word + "' detected");
+                throw new IllegalTokenException("illegal token '" + word + "' detected");
         }
         return tokens;
     }

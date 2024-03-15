@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import constructs.*;
 import exceptions.WrongSyntaxException;
@@ -47,10 +49,10 @@ public class Parser {
                 case IDEN:
                     return parseIden(tokens.remove());
                 default:
-                    throw new WrongSyntaxException("unexpected token passed as argument");
+                    throw new WrongSyntaxException("unexpected token '" + nextToken.value + "'");
             }
         } else
-            throw new WrongSyntaxException("expected argument but none was found");
+            throw new WrongSyntaxException("expected expression but none was found");
     }
 
     private static Int parseInt(Token token) {
@@ -69,7 +71,7 @@ public class Parser {
         Letrec rec = new Letrec();
         parseToken(tokens, new Token(TokenType.REC, "Letrec"));
         rec.name = parseExpression(tokens);
-        rec.param = parseExpression(tokens);
+        rec.params = parseListOfParams(tokens, new Token(TokenType.EQ, "="));
         parseToken(tokens, new Token(TokenType.EQ, "="));
         rec.fbody = parseExpression(tokens);
         parseToken(tokens, new Token(TokenType.IN, "in"));
@@ -102,7 +104,7 @@ public class Parser {
     private static Expression parseFun(Queue<Token> tokens) throws WrongSyntaxException {
         Function fun = new Function();
         parseToken(tokens, new Token(TokenType.FUN, "Fun"));
-        fun.formalParam = parseExpression(tokens);
+        fun.formalParams = parseListOfParams(tokens, new Token(TokenType.ARROW, "->"));
         parseToken(tokens, new Token(TokenType.ARROW, "->"));
         fun.body = parseExpression(tokens);
         return fun;
@@ -112,7 +114,8 @@ public class Parser {
         Apply app = new Apply();
         parseToken(tokens, new Token(TokenType.APPLY, "Apply"));
         app.iden = parseExpression(tokens);
-        app.actualParam = parseExpression(tokens);
+        app.actualParams = parseListOfParams(tokens, new Token(TokenType.END, ";"));
+        parseToken(tokens, new Token(TokenType.END, ";"));
         return app;
     }
 
@@ -139,10 +142,32 @@ public class Parser {
     }
 
     private static void parseToken(Queue<Token> tokens, Token expected) throws WrongSyntaxException {
-        if ((nextToken = tokens.peek()) == null || nextToken.type != expected.type)
+        nextToken = tokens.peek();
+        if (nextToken == null)
             throw new WrongSyntaxException("expected '" + expected.value + "'");
-        else
-            tokens.remove();
+        if (nextToken.type != expected.type)
+            throw new WrongSyntaxException(
+                    "expected '" + expected.value + "' but found '" + nextToken.value + "' instead");
+        tokens.remove();
+    }
+
+    private static List<Expression> parseListOfParams(Queue<Token> tokens, Token stopAt)
+            throws WrongSyntaxException {
+        List<Expression> params = new ArrayList<Expression>();
+        while (tokens.peek().type != stopAt.type) {
+            if (params.size() >= 16)
+                throw new WrongSyntaxException("Too many parameters passed to function");
+            else {
+                try {
+                    params.add(parseExpression(tokens));
+                } catch (WrongSyntaxException e) {
+                    throw new WrongSyntaxException("expected '" + stopAt.value + "' to delimit list of parameters");
+                }
+            }
+        }
+        if (params.size() == 0)
+            throw new WrongSyntaxException("No parameters passed to function");
+        return params;
     }
 
     private static Symbol parseSymbol(Queue<Token> tokens) throws WrongSyntaxException {
@@ -163,7 +188,7 @@ public class Parser {
                     s.value = nextToken.value;
                     return s;
                 default:
-                    throw new WrongSyntaxException("expected operation symbol");
+                    throw new WrongSyntaxException("unexpected operation symbol '" + nextToken.value + "'");
             }
         } else
             throw new WrongSyntaxException("expected operation symbol but none was found");

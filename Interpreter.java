@@ -11,7 +11,8 @@ import types.*;
 public class Interpreter {
 
     private static Expression eval(Expression e, Stack<Binding> env)
-            throws ZeroDividerException, UnknownCommandException, TypeMismatchException, NoBindingException {
+            throws ZeroDividerException, UnknownCommandException, TypeMismatchException, NoBindingException,
+            WrongSyntaxException {
         switch (e) {
             case Operation op -> {
                 Expression e1 = eval(op.e1, env), e2 = eval(op.e2, env);
@@ -97,28 +98,38 @@ public class Interpreter {
             }
             case Letrec letr -> {
                 typecheck(letr.name, new Iden());
-                typecheck(letr.param, new Iden());
-                RecursiveClosure closure = new RecursiveClosure((Iden) letr.name, (Iden) letr.param, letr.fbody, env);
+                for (Expression param : letr.params)
+                    typecheck(param, new Iden());
+                RecClosure closure = new RecClosure((Iden) letr.name, letr.params, letr.fbody, env);
                 Binding bin = new Binding((Iden) letr.name, closure);
                 Stack<Binding> newEnv = bind(bin, env);
                 return eval(letr.letbody, newEnv);
             }
             case Apply app -> {
-                typecheck(app.iden, new Iden());
-                Expression closure = lookup((Iden) app.iden, env);
+                int i = 0;
+                Expression closure = eval(app.iden, env);
                 switch (closure) {
-                    case Closure c -> {
-                        Expression aVal = eval(app.actualParam, env);
-                        Binding bin = new Binding(c.param, aVal);
-                        Stack<Binding> extFenv = bind(bin, c.fenv);
-                        return eval(c.body, extFenv);
+                    case Closure clo -> {
+                        if (app.actualParams.size() != clo.params.size())
+                            throw new WrongSyntaxException("Apply parameters do not match function in numbers");
+                        for (Expression param : clo.params) {
+                            Expression aVal = eval(app.actualParams.get(i++), env);
+                            Binding bin = new Binding((Iden) param, aVal);
+                            clo.fenv = bind(bin, clo.fenv);
+                        }
+                        return eval(clo.body, clo.fenv);
                     }
-                    case RecursiveClosure rec -> {
-                        Expression aVal = eval(app.actualParam, env);
+                    case RecClosure rec -> {
+                        if (app.actualParams.size() != rec.params.size())
+                            throw new WrongSyntaxException("Apply parameters do not match function in numbers");
+                        Stack<Binding> extFenv = new Stack<Binding>();
                         Binding bin = new Binding(rec.name, rec);
-                        Stack<Binding> extFenv = bind(bin, rec.fenv);
-                        bin = new Binding(rec.param, aVal);
-                        extFenv = bind(bin, extFenv);
+                        extFenv = bind(bin, rec.fenv);
+                        for (Expression param : rec.params) {
+                            Expression aVal = eval(app.actualParams.get(i++), env);
+                            bin = new Binding((Iden) param, aVal);
+                            extFenv = bind(bin, extFenv);
+                        }
                         return eval(rec.body, extFenv);
                     }
                     default -> throw new TypeMismatchException("not a functional value");
@@ -135,8 +146,9 @@ public class Interpreter {
                 return b;
             }
             case Function f -> {
-                typecheck(f.formalParam, new Iden());
-                return new Closure((Iden) f.formalParam, f.body, env);
+                for (Expression param : f.formalParams)
+                    typecheck(param, new Iden());
+                return new Closure(f.formalParams, f.body, env);
             }
             default -> throw new UnknownCommandException(null);
         }

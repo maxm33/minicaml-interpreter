@@ -17,4 +17,5 @@ public enum TokenType {
     EQ,
     SYMB,
     IDEN,
+    END,
 }
