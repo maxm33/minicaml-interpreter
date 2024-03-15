@@ -156,7 +156,7 @@ public class Parser {
         List<Expression> params = new ArrayList<Expression>();
         while (tokens.peek().type != stopAt.type) {
             if (params.size() >= 16)
-                throw new WrongSyntaxException("Too many parameters passed to function");
+                throw new WrongSyntaxException("too many parameters passed to function");
             else {
                 try {
                     params.add(parseExpression(tokens));
@@ -166,7 +166,7 @@ public class Parser {
             }
         }
         if (params.size() == 0)
-            throw new WrongSyntaxException("No parameters passed to function");
+            throw new WrongSyntaxException("no parameters passed to function");
         return params;
     }
 

@@ -14,12 +14,12 @@ public class Interpreter {
             throws ZeroDividerException, UnknownCommandException, TypeMismatchException, NoBindingException,
             WrongSyntaxException {
         switch (e) {
-            case Operation op -> {
-                Expression e1 = eval(op.e1, env), e2 = eval(op.e2, env);
+            case Operation bop -> {
+                Expression e1 = eval(bop.e1, env), e2 = eval(bop.e2, env);
                 Int ret_int = new Int();
                 Bool ret_bool = new Bool();
-                typecheck(op.op, new Symbol());
-                switch (((Symbol) op.op).value) {
+                typecheck(bop.op, new Symbol());
+                switch (((Symbol) bop.op).value) {
                     case "+":
                         typecheck(e1, ret_int);
                         typecheck(e2, ret_int);
@@ -72,7 +72,7 @@ public class Interpreter {
                             throw new TypeMismatchException("unexpected type passed to operation");
                         return ret_bool;
                     default:
-                        throw new UnknownCommandException("Unknown operation '" + ((Symbol) op.op).value + "'");
+                        throw new UnknownCommandException("unknown operation '" + ((Symbol) bop.op).value + "'");
                 }
             }
             case Not not -> {
@@ -111,7 +111,8 @@ public class Interpreter {
                 switch (closure) {
                     case Closure clo -> {
                         if (app.actualParams.size() != clo.params.size())
-                            throw new WrongSyntaxException("Apply parameters do not match function in numbers");
+                            throw new WrongSyntaxException(
+                                    "functional application parameters do not match the function signature");
                         @SuppressWarnings("unchecked")
                         Stack<Binding> extFenv = (Stack<Binding>) clo.fenv.clone();
                         for (Expression param : clo.params) {
@@ -123,7 +124,8 @@ public class Interpreter {
                     }
                     case RecClosure rec -> {
                         if (app.actualParams.size() != rec.params.size())
-                            throw new WrongSyntaxException("Apply parameters do not match function in numbers");
+                            throw new WrongSyntaxException(
+                                    "functional application parameters do not match the function signature");
                         Stack<Binding> extFenv = new Stack<Binding>();
                         Binding bin = new Binding(rec.name, rec);
                         extFenv = bind(bin, rec.fenv);
@@ -181,7 +183,7 @@ public class Interpreter {
             throws IllegalTokenException, WrongSyntaxException, ZeroDividerException,
             UnknownCommandException, TypeMismatchException, NoBindingException, IOException {
         if (args.length < 1) {
-            System.err.println("\nno path was provided.\nUsage: java Interpreter <path-to-file>");
+            System.err.println("\nNo path was provided.\nUsage: java Interpreter <path-to-file>");
             return;
         }
         String program = Files.readString(Paths.get(args[0]));
@@ -200,9 +202,9 @@ public class Interpreter {
         long stop = System.currentTimeMillis();
 
         if (result instanceof Int e)
-            System.out.println("output: " + e.value);
+            System.out.println("Output: " + e.value);
         if (result instanceof Bool e)
-            System.out.println("output: " + e.value);
+            System.out.println("Output: " + e.value);
 
         System.out.println("\nExecuted in " + (stop - start) + " ms.");
     }
