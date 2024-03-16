@@ -1,0 +1,25 @@
+Op {
+    Op {
+        2
+        >
+        1
+    }
+    |
+    Not {
+        Op {
+            Not {
+                Op {
+                    true
+                    !=
+                    Op {
+                        4 < 6
+                    }
+                }
+            }
+            ==
+            Op {
+                false & false
+            }
+        }
+    }
+}

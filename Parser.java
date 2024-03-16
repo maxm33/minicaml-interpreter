@@ -184,6 +184,7 @@ public class Parser {
                 case ">":
                 case "<":
                 case "==":
+                case "!=":
                     Symbol s = new Symbol();
                     s.value = nextToken.value;
                     return s;

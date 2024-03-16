@@ -1,0 +1,4 @@
+Let y = 5 in
+    Let x = Op (y + 2) in
+        Let y = Op (x * y) in
+            y

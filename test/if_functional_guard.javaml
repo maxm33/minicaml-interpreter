@@ -1,0 +1,1 @@
+If fun x -> Op x & true then true else false

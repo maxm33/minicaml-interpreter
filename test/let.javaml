@@ -1,6 +1,0 @@
-Let {
-	var = Fun f y -> Op f * y
-	in {
-		Apply(var 10 2 ;)
-	}
-}

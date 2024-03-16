@@ -1,8 +1,9 @@
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
-import java.util.Stack;
 import constructs.*;
 import exceptions.*;
 import token.Token;
@@ -10,7 +11,7 @@ import types.*;
 
 public class Interpreter {
 
-    private static Expression eval(Expression e, Stack<Binding> env)
+    public static Expression eval(Expression e, List<Binding> env)
             throws ZeroDividerException, UnknownCommandException, TypeMismatchException, NoBindingException,
             WrongSyntaxException {
         switch (e) {
@@ -72,6 +73,16 @@ public class Interpreter {
                             throw new TypeMismatchException(
                                     "unexpected type '" + e1.getClass().toString() + "' passed to operation '=='");
                         return ret_bool;
+                    case "!=":
+                        typecheck(e2, e1);
+                        if (e1 instanceof Bool b1 && e2 instanceof Bool b2)
+                            ret_bool.value = b1.value != b2.value;
+                        else if (e1 instanceof Int i1 && e2 instanceof Int i2)
+                            ret_bool.value = i1.value != i2.value;
+                        else
+                            throw new TypeMismatchException(
+                                    "unexpected type '" + e1.getClass().toString() + "' passed to operation '!='");
+                        return ret_bool;
                     default:
                         throw new UnknownCommandException("unknown operation '" + ((Symbol) bop.op).value + "'");
                 }
@@ -94,7 +105,7 @@ public class Interpreter {
             case Let let -> {
                 typecheck(let.var, new Iden());
                 Binding bin = new Binding((Iden) let.var, eval(let.value, env));
-                Stack<Binding> newEnv = bind(bin, env);
+                List<Binding> newEnv = bind(bin, env);
                 return eval(let.body, newEnv);
             }
             case Letrec letr -> {
@@ -103,7 +114,7 @@ public class Interpreter {
                     typecheck(param, new Iden());
                 RecClosure closure = new RecClosure((Iden) letr.name, letr.params, letr.fbody, env);
                 Binding bin = new Binding((Iden) letr.name, closure);
-                Stack<Binding> newEnv = bind(bin, env);
+                List<Binding> newEnv = bind(bin, env);
                 return eval(letr.letbody, newEnv);
             }
             case Apply app -> {
@@ -114,8 +125,7 @@ public class Interpreter {
                         if (app.actualParams.size() != clo.params.size())
                             throw new WrongSyntaxException(
                                     "functional application parameters do not match the function signature");
-                        @SuppressWarnings("unchecked")
-                        Stack<Binding> extFenv = (Stack<Binding>) clo.fenv.clone();
+                        List<Binding> extFenv = clone(clo.fenv);
                         for (Expression param : clo.params) {
                             Expression aVal = eval(app.actualParams.get(i++), env);
                             Binding bin = new Binding((Iden) param, aVal);
@@ -127,7 +137,7 @@ public class Interpreter {
                         if (app.actualParams.size() != rec.params.size())
                             throw new WrongSyntaxException(
                                     "functional application parameters do not match the function signature");
-                        Stack<Binding> extFenv = new Stack<Binding>();
+                        List<Binding> extFenv = new ArrayList<Binding>();
                         Binding bin = new Binding(rec.name, rec);
                         extFenv = bind(bin, rec.fenv);
                         for (Expression param : rec.params) {
@@ -166,18 +176,24 @@ public class Interpreter {
                             + "' was found");
     }
 
-    @SuppressWarnings("unchecked")
-    private static Stack<Binding> bind(Binding bin, Stack<Binding> env) {
-        Stack<Binding> newEnv = (Stack<Binding>) env.clone();
-        newEnv.push(bin);
+    private static List<Binding> bind(Binding bin, List<Binding> env) {
+        List<Binding> newEnv = clone(env);
+        newEnv.add(bin);
         return newEnv;
     }
 
-    private static Expression lookup(Iden iden, Stack<Binding> env) throws NoBindingException {
-        for (Binding bin : env)
-            if ((bin.var.value).contentEquals(iden.value))
-                return bin.value;
+    private static Expression lookup(Iden iden, List<Binding> env) throws NoBindingException {
+        for (int i = env.size() - 1; i >= 0; i--)
+            if (env.get(i).var.value.contentEquals(iden.value))
+                return env.get(i).value;
         throw new NoBindingException("variable '" + iden.value + "' is not bound in scope");
+    }
+
+    private static List<Binding> clone(List<Binding> oldList) {
+        List<Binding> newList = new ArrayList<Binding>();
+        for (Binding bin : oldList)
+            newList.add(bin);
+        return newList;
     }
 
     public static void main(String[] args)
@@ -197,7 +213,7 @@ public class Interpreter {
         Expression exp = Parser.parse(tokens);
         System.out.println("Parsing done.");
 
-        Stack<Binding> emptyEnv = new Stack<Binding>();
+        List<Binding> emptyEnv = new ArrayList<Binding>();
         Expression result = eval(exp, emptyEnv);
         System.out.println("Expression evaluated.\n");
         long stop = System.currentTimeMillis();
