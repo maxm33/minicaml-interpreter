@@ -15,6 +15,7 @@ public class Parser {
         if ((nextToken = tokens.peek()) == null)
             throw new WrongSyntaxException("no tokens were found");
         result = parseExpression(tokens);
+        parseToken(tokens, new Token(TokenType.END_BLOCK, ";;"));
         if (tokens.size() > 0) {
             String s = new String();
             for (Token t : tokens)
@@ -39,9 +40,13 @@ public class Parser {
                 case IF:
                     return parseIf(tokens);
                 case FUN:
-                    return parseFun(tokens);
+                    return parseFunction(tokens);
                 case APPLY:
                     return parseApply(tokens);
+                case LIST_S:
+                    return parseList(tokens);
+                case LIST_OP:
+                    return parseListOP(tokens);
                 case OP:
                     return parseBinaryOP(tokens);
                 case NOT:
@@ -69,30 +74,34 @@ public class Parser {
 
     private static Expression parseRec(Queue<Token> tokens) throws WrongSyntaxException {
         Letrec rec = new Letrec();
-        parseToken(tokens, new Token(TokenType.REC, "Letrec"));
+        parseToken(tokens, new Token(TokenType.REC, "letrec"));
         rec.name = parseExpression(tokens);
         rec.params = parseListOfParams(tokens, new Token(TokenType.EQ, "="));
         parseToken(tokens, new Token(TokenType.EQ, "="));
         rec.fbody = parseExpression(tokens);
-        parseToken(tokens, new Token(TokenType.IN, "in"));
-        rec.letbody = parseExpression(tokens);
+        if (tokens.peek().type != TokenType.END_BLOCK) {
+            parseToken(tokens, new Token(TokenType.IN, "in"));
+            rec.letbody = parseExpression(tokens);
+        }
         return rec;
     }
 
     private static Expression parseLet(Queue<Token> tokens) throws WrongSyntaxException {
         Let let = new Let();
-        parseToken(tokens, new Token(TokenType.LET, "Let"));
+        parseToken(tokens, new Token(TokenType.LET, "let"));
         let.var = parseExpression(tokens);
         parseToken(tokens, new Token(TokenType.EQ, "="));
         let.value = parseExpression(tokens);
-        parseToken(tokens, new Token(TokenType.IN, "in"));
-        let.body = parseExpression(tokens);
+        if (tokens.peek().type != TokenType.END_BLOCK) {
+            parseToken(tokens, new Token(TokenType.IN, "in"));
+            let.body = parseExpression(tokens);
+        }
         return let;
     }
 
     private static Expression parseIf(Queue<Token> tokens) throws WrongSyntaxException {
         Ifthenelse ifte = new Ifthenelse();
-        parseToken(tokens, new Token(TokenType.IF, "If"));
+        parseToken(tokens, new Token(TokenType.IF, "if"));
         ifte.guard = parseExpression(tokens);
         parseToken(tokens, new Token(TokenType.THEN, "then"));
         ifte.then = parseExpression(tokens);
@@ -101,9 +110,9 @@ public class Parser {
         return ifte;
     }
 
-    private static Expression parseFun(Queue<Token> tokens) throws WrongSyntaxException {
+    private static Expression parseFunction(Queue<Token> tokens) throws WrongSyntaxException {
         Function fun = new Function();
-        parseToken(tokens, new Token(TokenType.FUN, "Fun"));
+        parseToken(tokens, new Token(TokenType.FUN, "function"));
         fun.formalParams = parseListOfParams(tokens, new Token(TokenType.ARROW, "->"));
         parseToken(tokens, new Token(TokenType.ARROW, "->"));
         fun.body = parseExpression(tokens);
@@ -112,16 +121,55 @@ public class Parser {
 
     private static Expression parseApply(Queue<Token> tokens) throws WrongSyntaxException {
         Apply app = new Apply();
-        parseToken(tokens, new Token(TokenType.APPLY, "Apply"));
+        parseToken(tokens, new Token(TokenType.APPLY, "apply"));
         app.iden = parseExpression(tokens);
-        app.actualParams = parseListOfParams(tokens, new Token(TokenType.END, ";"));
-        parseToken(tokens, new Token(TokenType.END, ";"));
+        app.actualParams = parseListOfParams(tokens, new Token(TokenType.END_PARAM, ";"));
+        parseToken(tokens, new Token(TokenType.END_PARAM, ";"));
         return app;
+    }
+
+    private static Lis parseList(Queue<Token> tokens) throws WrongSyntaxException {
+        Lis l = new Lis();
+        parseToken(tokens, new Token(TokenType.LIST_S, "["));
+        while (tokens.peek().type != TokenType.LIST_E)
+            l.lis.add(parseExpression(tokens));
+        parseToken(tokens, new Token(TokenType.LIST_E, "]"));
+        return l;
+    }
+
+    private static Expression parseListOP(Queue<Token> tokens) throws WrongSyntaxException {
+        String[] s = tokens.remove().value.split("\\.");
+        String operation = s[1];
+        switch (operation) {
+            case "add":
+                ListAdd add = new ListAdd();
+                add.element = parseExpression(tokens);
+                add.list = parseExpression(tokens);
+                return add;
+            case "remove":
+                ListRemove rem = new ListRemove();
+                rem.list = parseExpression(tokens);
+                return rem;
+            case "head":
+                ListHead head = new ListHead();
+                head.list = parseExpression(tokens);
+                return head;
+            case "isEmpty":
+                ListEmpty emp = new ListEmpty();
+                emp.list = parseExpression(tokens);
+                return emp;
+            case "length":
+                ListLength len = new ListLength();
+                len.list = parseExpression(tokens);
+                return len;
+            default:
+                throw new WrongSyntaxException("invalid list operation '" + s[1] + "'");
+        }
     }
 
     private static Expression parseBinaryOP(Queue<Token> tokens) throws WrongSyntaxException {
         Operation bop = new Operation();
-        parseToken(tokens, new Token(TokenType.OP, "Op"));
+        parseToken(tokens, new Token(TokenType.OP, "op"));
         bop.e1 = parseExpression(tokens);
         bop.op = parseSymbol(tokens);
         bop.e2 = parseExpression(tokens);
@@ -130,7 +178,7 @@ public class Parser {
 
     private static Expression parseNot(Queue<Token> tokens) throws WrongSyntaxException {
         Not not = new Not();
-        parseToken(tokens, new Token(TokenType.NOT, "Not"));
+        parseToken(tokens, new Token(TokenType.NOT, "!"));
         not.arg = parseExpression(tokens);
         return not;
     }

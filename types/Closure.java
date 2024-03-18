@@ -7,6 +7,9 @@ public class Closure implements Expression {
     public Expression body;
     public List<Binding> fenv;
 
+    public Closure() {
+    }
+
     public Closure(List<Expression> params, Expression body, List<Binding> fenv) {
         this.params = params;
         this.body = body;

@@ -8,6 +8,9 @@ public class RecClosure implements Expression {
     public Expression body;
     public List<Binding> fenv;
 
+    public RecClosure() {
+    }
+
     public RecClosure(Iden name, List<Expression> params, Expression body, List<Binding> fenv) {
         this.name = name;
         this.params = params;

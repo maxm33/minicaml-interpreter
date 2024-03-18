@@ -1,0 +1,30 @@
+op ( op(1 + 3) * op(2 - op(16 / 8)) ) ;;
+
+op ( op(2 > 1) | ! op(! op(true != op(4 < 6)) == op(false & false)) ) ;;
+
+[ ] ;;
+
+let lis = [ 1,2,3,4,5 ] ;;
+
+let var = op (1 - 2) in op (var * 6) ;;
+
+letrec fact n = if op (n < 2)
+		        then 1 
+		        else op n * apply fact op (n - 1) ; ;;
+
+let x = 5 ;;
+
+let mul = function f y -> op f * y in apply(mul 10 2); ;;
+
+let y = 5 in
+    let x = op (y + 2) in
+        let y = op (x * y) in
+            y ;;
+
+[ x,1,2 ] ;;
+
+let f = function y -> op x + y ;;
+
+apply f 6 ; ;;
+
+apply fact 4 ; ;;

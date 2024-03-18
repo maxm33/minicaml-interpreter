@@ -1,1 +1,0 @@
-Let mul = Fun f y -> Op f * y in Apply(mul 10 2);
