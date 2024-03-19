@@ -30,4 +30,5 @@ javac Interpreter.java
 java Interpreter <path-to-file>
 ```
 
-- Some test programs are available in `test` folder.
+> [!TIP]
+> Some test programs are available in `test` folder.
