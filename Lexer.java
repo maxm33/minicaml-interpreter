@@ -50,13 +50,13 @@ public class Lexer {
                 tokens.add(new Token(TokenType.OP, word));
             else if (word.contentEquals("!"))
                 tokens.add(new Token(TokenType.NOT, word));
-            else if (word.matches("\\+|-|\\*|/|&|\\||>|<|==|!="))
+            else if (word.matches("\\+|-|\\*|/|&|\\||>|<|>=|<=|==|!="))
                 tokens.add(new Token(TokenType.SYMB, word));
             else if (word.matches("[a-z]+"))
                 tokens.add(new Token(TokenType.IDEN, word));
             else
                 throw new IllegalTokenException(
-                        "illegal token '" + word + "' detected. Try spacing between characters.");
+                        "illegal token " + word + " detected. Try spacing between characters.");
         }
         return tokens;
     }

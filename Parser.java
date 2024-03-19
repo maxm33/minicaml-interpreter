@@ -13,7 +13,7 @@ public class Parser {
 
     public static Expression parse(Queue<Token> tokens) throws WrongSyntaxException {
         if ((nextToken = tokens.peek()) == null)
-            throw new WrongSyntaxException("no tokens were found");
+            throw new WrongSyntaxException("no tokens found");
         result = parseExpression(tokens);
         parseToken(tokens, new Token(TokenType.END_BLOCK, ";;"));
         if (tokens.size() > 0) {
@@ -54,10 +54,10 @@ public class Parser {
                 case IDEN:
                     return parseIden(tokens.remove());
                 default:
-                    throw new WrongSyntaxException("unexpected token '" + nextToken.value + "'");
+                    throw new WrongSyntaxException("unexpected token " + nextToken.value);
             }
         } else
-            throw new WrongSyntaxException("expected expression but none was found");
+            throw new WrongSyntaxException("expected expression but found none");
     }
 
     private static Int parseInt(Token token) {
@@ -163,7 +163,7 @@ public class Parser {
                 len.list = parseExpression(tokens);
                 return len;
             default:
-                throw new WrongSyntaxException("invalid list operation '" + s[1] + "'");
+                throw new WrongSyntaxException("invalid list operation " + s[1]);
         }
     }
 
@@ -185,17 +185,16 @@ public class Parser {
 
     private static Iden parseIden(Token token) {
         Iden id = new Iden();
-        id.value = nextToken.value;
+        id.value = token.value;
         return id;
     }
 
     private static void parseToken(Queue<Token> tokens, Token expected) throws WrongSyntaxException {
         nextToken = tokens.peek();
         if (nextToken == null)
-            throw new WrongSyntaxException("expected '" + expected.value + "'");
+            throw new WrongSyntaxException("expected " + expected.value + " but found none");
         if (nextToken.type != expected.type)
-            throw new WrongSyntaxException(
-                    "expected '" + expected.value + "' but found '" + nextToken.value + "' instead");
+            throw new WrongSyntaxException("expected " + expected.value + " but found " + nextToken.value);
         tokens.remove();
     }
 
@@ -209,7 +208,7 @@ public class Parser {
                 try {
                     params.add(parseExpression(tokens));
                 } catch (WrongSyntaxException e) {
-                    throw new WrongSyntaxException("expected '" + stopAt.value + "' to delimit list of parameters");
+                    throw new WrongSyntaxException("expected " + stopAt.value + " to delimit list of parameters");
                 }
             }
         }
@@ -231,15 +230,17 @@ public class Parser {
                 case "|":
                 case ">":
                 case "<":
+                case ">=":
+                case "<=":
                 case "==":
                 case "!=":
                     Symbol s = new Symbol();
                     s.value = nextToken.value;
                     return s;
                 default:
-                    throw new WrongSyntaxException("unexpected operation symbol '" + nextToken.value + "'");
+                    throw new WrongSyntaxException("unexpected operation symbol " + nextToken.value);
             }
         } else
-            throw new WrongSyntaxException("expected operation symbol but none was found");
+            throw new WrongSyntaxException("expected operation symbol but found none");
     }
 }

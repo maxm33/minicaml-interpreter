@@ -17,6 +17,47 @@ public class Interpreter {
             throws ZeroDividerException, UnknownCommandException, TypeMismatchException, NoBindingException,
             WrongSyntaxException {
         switch (e) {
+            case Int i -> {
+                return i;
+            }
+            case Bool b -> {
+                return b;
+            }
+            case Iden id -> {
+                Expression val = lookup(id, env);
+                return val;
+            }
+            case Function f -> {
+                for (Expression param : f.formalParams)
+                    typecheck(param, new Iden());
+                return new Closure(f.formalParams, f.body, env);
+            }
+            case Lis l -> {
+                if (l.lis.size() > 0) {
+                    if (l.type == null) {
+                        Expression first = eval(l.lis.getFirst(), env);
+                        if (first instanceof Int)
+                            l.type = new Int();
+                        else if (first instanceof Bool)
+                            l.type = new Bool();
+                        else if (first instanceof Closure)
+                            l.type = new Closure();
+                        else if (first instanceof RecClosure)
+                            l.type = new RecClosure();
+                        else if (first instanceof Lis)
+                            l.type = new Lis();
+                        else
+                            throw new TypeMismatchException(
+                                    "unexpected type " + first.getClass().getSimpleName() + " inside list");
+                    }
+                    for (int i = 0; i < l.lis.size(); i++) {
+                        Expression element = eval(l.lis.get(i), env);
+                        typecheck(element, l.type);
+                        l.lis.set(i, element);
+                    }
+                }
+                return l;
+            }
             case Operation bop -> {
                 Expression e1 = eval(bop.e1, env), e2 = eval(bop.e2, env);
                 Int ret_int = new Int();
@@ -65,6 +106,16 @@ public class Interpreter {
                         typecheck(e2, ret_int);
                         ret_bool.value = ((Int) e1).value < ((Int) e2).value;
                         return ret_bool;
+                    case ">=":
+                        typecheck(e1, ret_int);
+                        typecheck(e2, ret_int);
+                        ret_bool.value = ((Int) e1).value >= ((Int) e2).value;
+                        return ret_bool;
+                    case "<=":
+                        typecheck(e1, ret_int);
+                        typecheck(e2, ret_int);
+                        ret_bool.value = ((Int) e1).value <= ((Int) e2).value;
+                        return ret_bool;
                     case "==":
                         typecheck(e2, e1);
                         if (e1 instanceof Bool b1 && e2 instanceof Bool b2)
@@ -73,7 +124,7 @@ public class Interpreter {
                             ret_bool.value = i1.value == i2.value;
                         else
                             throw new TypeMismatchException(
-                                    "unexpected type '" + e1.getClass().getSimpleName() + "' passed to operation '=='");
+                                    "unexpected type " + e1.getClass().getSimpleName() + " passed to operation ==");
                         return ret_bool;
                     case "!=":
                         typecheck(e2, e1);
@@ -83,16 +134,16 @@ public class Interpreter {
                             ret_bool.value = i1.value != i2.value;
                         else
                             throw new TypeMismatchException(
-                                    "unexpected type '" + e1.getClass().getSimpleName() + "' passed to operation '!='");
+                                    "unexpected type " + e1.getClass().getSimpleName() + " passed to operation !=");
                         return ret_bool;
                     default:
-                        throw new UnknownCommandException("unknown operation '" + ((Symbol) bop.op).value + "'");
+                        throw new UnknownCommandException("unknown operation " + ((Symbol) bop.op).value);
                 }
             }
             case Not not -> {
                 Expression arg = eval(not.arg, env);
-                typecheck(arg, new Bool());
                 Bool ret = new Bool();
+                typecheck(arg, ret);
                 ret.value = !((Bool) arg).value;
                 return ret;
             }
@@ -192,58 +243,17 @@ public class Interpreter {
                 Expression h = list.lis.peek();
                 return h;
             }
-            case ListEmpty isempty -> {
-                Lis list = (Lis) eval(isempty.list, env);
+            case ListEmpty emp -> {
+                Lis list = (Lis) eval(emp.list, env);
                 Bool ret = new Bool();
                 ret.value = list.lis.isEmpty();
                 return ret;
             }
-            case ListLength length -> {
-                Lis list = (Lis) eval(length.list, env);
+            case ListLength len -> {
+                Lis list = (Lis) eval(len.list, env);
                 Int ret = new Int();
                 ret.value = list.lis.size();
                 return ret;
-            }
-            case Iden iden -> {
-                Expression val = lookup(iden, env);
-                return val;
-            }
-            case Int i -> {
-                return i;
-            }
-            case Bool b -> {
-                return b;
-            }
-            case Lis l -> {
-                if (l.lis.size() > 0) {
-                    if (l.type == null) {
-                        Expression first = eval(l.lis.getFirst(), env);
-                        if (first instanceof Int)
-                            l.type = new Int();
-                        else if (first instanceof Bool)
-                            l.type = new Bool();
-                        else if (first instanceof Closure)
-                            l.type = new Closure();
-                        else if (first instanceof RecClosure)
-                            l.type = new RecClosure();
-                        else if (first instanceof Lis)
-                            l.type = new Lis();
-                        else
-                            throw new TypeMismatchException(
-                                    "unexpected type '" + first.getClass().getSimpleName() + "' inside list");
-                    }
-                    for (int i = 0; i < l.lis.size(); i++) {
-                        Expression element = eval(l.lis.get(i), env);
-                        typecheck(element, l.type);
-                        l.lis.set(i, element);
-                    }
-                }
-                return l;
-            }
-            case Function f -> {
-                for (Expression param : f.formalParams)
-                    typecheck(param, new Iden());
-                return new Closure(f.formalParams, f.body, env);
             }
             default -> throw new UnknownCommandException(null);
         }
@@ -251,10 +261,8 @@ public class Interpreter {
 
     private static void typecheck(Expression actualType, Expression expectedType) throws TypeMismatchException {
         if (!actualType.getClass().equals(expectedType.getClass()))
-            throw new TypeMismatchException(
-                    "expected '" + expectedType.getClass().getSimpleName() + "' but '"
-                            + actualType.getClass().getSimpleName()
-                            + "' was found");
+            throw new TypeMismatchException("expected " + expectedType.getClass().getSimpleName() + " but found "
+                    + actualType.getClass().getSimpleName());
     }
 
     private static List<Binding> bind(Binding bin, List<Binding> env) {
@@ -267,7 +275,7 @@ public class Interpreter {
         for (int i = env.size() - 1; i >= 0; i--)
             if (env.get(i).var.value.contentEquals(iden.value))
                 return env.get(i).value;
-        throw new NoBindingException("variable '" + iden.value + "' is not bound in scope");
+        throw new NoBindingException("variable " + iden.value + " is not bound in scope");
     }
 
     private static List<Binding> clone(List<Binding> oldList) {
@@ -288,7 +296,7 @@ public class Interpreter {
             case Closure c:
                 return "<fun>";
             case RecClosure r:
-                return "<rec fun>";
+                return "<rec>";
             case Lis l:
                 String out = "[";
                 for (Expression e : l.lis)
@@ -313,12 +321,13 @@ public class Interpreter {
         List<Binding> env = new ArrayList<Binding>();
 
         String[] blocks = program.split("(?<=\\s+;;)");
+        System.out.println();
         for (String block : blocks) {
-            System.out.println("\n" + block + "\n");
+            System.out.println(block + "\n");
             Queue<Token> tokens = Lexer.tokenize(block);
             Expression exp = Parser.parse(tokens);
             Expression result = eval(exp, env);
-            System.out.println("Output: " + printExpression(result));
+            System.out.println("-: " + result.getClass().getSimpleName() + " = " + printExpression(result));
         }
     }
 }
