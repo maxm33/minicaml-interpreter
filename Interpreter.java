@@ -360,8 +360,7 @@ public class Interpreter {
 
     private static void typecheck(Expression actualType, Expression expectedType) throws TypeMismatchException {
         if (!actualType.getClass().equals(expectedType.getClass()))
-            throw new TypeMismatchException("expected " + expectedType.getClass().getSimpleName() + " but found "
-                    + actualType.getClass().getSimpleName());
+            throw new TypeMismatchException("expected type " + expectedType.getClass().getSimpleName() + " but found type " + actualType.getClass().getSimpleName());
     }
 
     private static List<Binding> bind(Binding bin, List<Binding> env) {
