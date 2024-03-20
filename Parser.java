@@ -162,8 +162,13 @@ public class Parser {
                 ListLength len = new ListLength();
                 len.list = parseExpression(tokens);
                 return len;
+            case "append":
+                ListAppend lapp = new ListAppend();
+                lapp.list1 = parseExpression(tokens);
+                lapp.list2 = parseExpression(tokens);
+                return lapp;
             default:
-                throw new WrongSyntaxException("invalid list operation " + s[1]);
+                throw new WrongSyntaxException("invalid list operation " + s[0] + "." + operation);
         }
     }
 

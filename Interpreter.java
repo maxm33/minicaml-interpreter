@@ -236,40 +236,59 @@ public class Interpreter {
             }
             case ListAdd add -> {
                 Expression element = eval(add.element, env);
-                Lis list = (Lis) eval(add.list, env);
-                if (list.type == null)
-                    list.type = element;
-                typecheck(element, list.type);
+                Expression list = eval(add.list, env);
+                typecheck(list, new Lis());
+                if (((Lis) list).type == null)
+                    ((Lis) list).type = element;
+                typecheck(element, ((Lis) list).type);
                 Lis newList = new Lis();
-                newList.type = list.type;
-                newList.lis = (LinkedList<Expression>) list.lis.clone();
+                newList.type = ((Lis) list).type;
+                newList.lis = (LinkedList<Expression>) ((Lis) list).lis.clone();
                 newList.lis.addLast(element);
                 return newList;
             }
             case ListRemove rem -> {
-                Lis list = (Lis) eval(rem.list, env);
+                Expression list = eval(rem.list, env);
+                typecheck(list, new Lis());
                 Lis newList = new Lis();
-                newList.type = list.type;
-                newList.lis = (LinkedList<Expression>) list.lis.clone();
+                newList.type = ((Lis) list).type;
+                newList.lis = (LinkedList<Expression>) ((Lis) list).lis.clone();
                 newList.lis.removeFirst();
                 return newList;
             }
             case ListHead head -> {
-                Lis list = (Lis) eval(head.list, env);
-                Expression h = list.lis.peek();
+                Expression list = eval(head.list, env);
+                typecheck(list, new Lis());
+                Expression h = ((Lis) list).lis.peek();
                 return h;
             }
             case ListEmpty emp -> {
-                Lis list = (Lis) eval(emp.list, env);
+                Expression list = eval(emp.list, env);
+                typecheck(list, new Lis());
                 Bool ret = new Bool();
-                ret.value = list.lis.isEmpty();
+                ret.value = ((Lis) list).lis.isEmpty();
                 return ret;
             }
             case ListLength len -> {
-                Lis list = (Lis) eval(len.list, env);
+                Expression list = eval(len.list, env);
+                typecheck(list, new Lis());
                 Int ret = new Int();
-                ret.value = list.lis.size();
+                ret.value = ((Lis) list).lis.size();
                 return ret;
+            }
+            case ListAppend lapp -> {
+                Expression list1 = eval(lapp.list1, env);
+                Expression list2 = eval(lapp.list2, env);
+                typecheck(list1, new Lis());
+                typecheck(list2, new Lis());
+                if (!((Lis) list1).lis.isEmpty() && !((Lis) list2).lis.isEmpty())
+                    typecheck(((Lis) list2).type, ((Lis) list1).type);
+                Lis newList = new Lis();
+                newList.type = ((Lis) list1).type;
+                newList.lis = (LinkedList<Expression>) ((Lis) list1).lis.clone();
+                for (Expression elem : ((Lis) list2).lis)
+                    newList.lis.addLast(elem);
+                return newList;
             }
             default -> throw new UnknownCommandException(null);
         }
