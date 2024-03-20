@@ -231,7 +231,7 @@ public class Interpreter {
                         }
                         return eval(rec.body, extFenv);
                     }
-                    default -> throw new TypeMismatchException("not a functional value");
+                    default -> throw new TypeMismatchException("not a functional value passed to apply");
                 }
             }
             case ListCons op -> {
