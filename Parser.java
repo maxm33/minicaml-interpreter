@@ -141,32 +141,52 @@ public class Parser {
         String[] s = tokens.remove().value.split("\\.");
         String operation = s[1];
         switch (operation) {
-            case "add":
-                ListAdd add = new ListAdd();
-                add.element = parseExpression(tokens);
-                add.list = parseExpression(tokens);
-                return add;
-            case "remove":
-                ListRemove rem = new ListRemove();
-                rem.list = parseExpression(tokens);
-                return rem;
-            case "head":
+            case "cons":
+                ListCons cons = new ListCons();
+                cons.element = parseExpression(tokens);
+                cons.list = parseExpression(tokens);
+                return cons;
+            case "hd":
                 ListHead head = new ListHead();
                 head.list = parseExpression(tokens);
                 return head;
+            case "tl":
+                ListTail tail = new ListTail();
+                tail.list = parseExpression(tokens);
+                return tail;
             case "isEmpty":
-                ListEmpty emp = new ListEmpty();
-                emp.list = parseExpression(tokens);
-                return emp;
+                ListEmpty empty = new ListEmpty();
+                empty.list = parseExpression(tokens);
+                return empty;
             case "length":
-                ListLength len = new ListLength();
-                len.list = parseExpression(tokens);
-                return len;
+                ListLength length = new ListLength();
+                length.list = parseExpression(tokens);
+                return length;
             case "append":
-                ListAppend lapp = new ListAppend();
-                lapp.list1 = parseExpression(tokens);
-                lapp.list2 = parseExpression(tokens);
-                return lapp;
+                ListAppend append = new ListAppend();
+                append.list1 = parseExpression(tokens);
+                append.list2 = parseExpression(tokens);
+                return append;
+            case "map":
+                ListMap map = new ListMap();
+                map.function = parseExpression(tokens);
+                map.list = parseExpression(tokens);
+                return map;
+            case "filter":
+                ListFilter filter = new ListFilter();
+                filter.function = parseExpression(tokens);
+                filter.list = parseExpression(tokens);
+                return filter;
+            case "exists":
+                ListExists exists = new ListExists();
+                exists.function = parseExpression(tokens);
+                exists.list = parseExpression(tokens);
+                return exists;
+            case "forAll":
+                ListForAll forAll = new ListForAll();
+                forAll.function = parseExpression(tokens);
+                forAll.list = parseExpression(tokens);
+                return forAll;
             default:
                 throw new WrongSyntaxException("invalid list operation " + s[0] + "." + operation);
         }
