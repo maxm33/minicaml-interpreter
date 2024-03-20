@@ -50,9 +50,9 @@ public class Lexer {
                 tokens.add(new Token(TokenType.OP, word));
             else if (word.contentEquals("!"))
                 tokens.add(new Token(TokenType.NOT, word));
-            else if (word.matches("\\+|-|\\*|/|&|\\||>|<|>=|<=|==|!="))
+            else if (word.matches("\\+|-|\\*|/|&|\\||>|<|>=|<=|%|\\^|==|!="))
                 tokens.add(new Token(TokenType.SYMB, word));
-            else if (word.matches("[a-z]+"))
+            else if (word.matches("[a-z]+[A-Z]*[0-9]*"))
                 tokens.add(new Token(TokenType.IDEN, word));
             else
                 throw new IllegalTokenException(

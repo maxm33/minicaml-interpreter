@@ -116,6 +116,22 @@ public class Interpreter {
                         typecheck(e2, ret_int);
                         ret_bool.value = ((Int) e1).value <= ((Int) e2).value;
                         return ret_bool;
+                    case "%":
+                        typecheck(e1, ret_int);
+                        typecheck(e2, ret_int);
+                        ret_int.value = ((Int) e1).value % ((Int) e2).value;
+                        return ret_int;
+                    case "^":
+                        typecheck(e2, e1);
+                        if (e1 instanceof Bool b1 && e2 instanceof Bool b2) {
+                            ret_bool.value = b1.value ^ b2.value;
+                            return ret_bool;
+                        } else if (e1 instanceof Int i1 && e2 instanceof Int i2) {
+                            ret_int.value = i1.value ^ i2.value;
+                            return ret_int;
+                        } else
+                            throw new TypeMismatchException(
+                                    "unexpected type " + e1.getClass().getSimpleName() + " passed to operation ^");
                     case "==":
                         typecheck(e2, e1);
                         if (e1 instanceof Bool b1 && e2 instanceof Bool b2)

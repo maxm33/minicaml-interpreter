@@ -1,8 +1,8 @@
-letrec search(elem lis index) =
+letrec search(elem lis count) =
     if (List.isEmpty lis) then -1
     else let head = List.head lis in
-        if op(head == elem) then index
-        else apply(search elem List.remove lis op index + 1 ;) ;;
+        if op(head == elem) then count
+        else apply(search elem List.remove lis op(count + 1) ;) ;;
 
 let list = [ 11,5,21,5,1,2 ] ;;
 apply(search 21 list 0 ;) ;;
