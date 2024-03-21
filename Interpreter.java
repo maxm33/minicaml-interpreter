@@ -323,6 +323,10 @@ public class Interpreter {
                                 re.value = false;
                         }
                         return re;
+                    case "rev":
+                        for (Expression elem : oplis.lis)
+                            newList.lis.addFirst(elem);
+                        return newList;
                     default:
                         throw new UnknownCommandException("unknown list operation '" + lop.operation + "'");
                 }

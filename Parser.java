@@ -68,6 +68,10 @@ public class Parser {
         return new Bool(Boolean.parseBoolean(token.value));
     }
 
+    private static Iden parseIden(Token token) {
+        return new Iden(token.value);
+    }
+
     private static Expression parseRec(Queue<Token> tokens) throws WrongSyntaxException {
         Letrec rec = new Letrec();
         parseToken(tokens, new Token(TokenType.REC, "letrec"));
@@ -138,12 +142,6 @@ public class Parser {
         ListOp lop = new ListOp();
         lop.operation = s[1];
         switch (lop.operation) {
-            case "hd":
-            case "tl":
-            case "isEmpty":
-            case "length":
-                lop.list = parseExpression(tokens);
-                return lop;
             case "cons":
             case "append":
             case "map":
@@ -151,6 +149,11 @@ public class Parser {
             case "exists":
             case "forAll":
                 lop.arg = parseExpression(tokens);
+            case "hd":
+            case "tl":
+            case "isEmpty":
+            case "length":
+            case "rev":
                 lop.list = parseExpression(tokens);
                 return lop;
             default:
@@ -172,10 +175,6 @@ public class Parser {
         parseToken(tokens, new Token(TokenType.NOT, "!"));
         not.arg = parseExpression(tokens);
         return not;
-    }
-
-    private static Iden parseIden(Token token) {
-        return new Iden(token.value);
     }
 
     private static void parseToken(Queue<Token> tokens, Token expected) throws WrongSyntaxException {
