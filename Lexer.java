@@ -56,7 +56,7 @@ public class Lexer {
                 tokens.add(new Token(TokenType.IDEN, word));
             else
                 throw new IllegalTokenException(
-                        "illegal token " + word + " detected. Try spacing between characters.");
+                        "illegal token '" + word + "' detected. Try spacing between characters.");
         }
         return tokens;
     }

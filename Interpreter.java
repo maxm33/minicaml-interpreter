@@ -48,7 +48,7 @@ public class Interpreter {
                             l.type = new Lis();
                         else
                             throw new TypeMismatchException(
-                                    "unexpected type " + first.getClass().getSimpleName() + " inside list");
+                                    "unexpected type '" + first.getClass().getSimpleName() + "' inside list");
                     }
                     for (int i = 0; i < l.lis.size(); i++) {
                         Expression element = eval(l.lis.get(i), env);
@@ -131,7 +131,7 @@ public class Interpreter {
                             return ret_int;
                         } else
                             throw new TypeMismatchException(
-                                    "unexpected type " + e1.getClass().getSimpleName() + " passed to operation ^");
+                                    "unexpected type '" + e1.getClass().getSimpleName() + "' passed to operation ^");
                     case "==":
                         typecheck(e2, e1);
                         if (e1 instanceof Bool b1 && e2 instanceof Bool b2)
@@ -140,7 +140,7 @@ public class Interpreter {
                             ret_bool.value = i1.value == i2.value;
                         else
                             throw new TypeMismatchException(
-                                    "unexpected type " + e1.getClass().getSimpleName() + " passed to operation ==");
+                                    "unexpected type '" + e1.getClass().getSimpleName() + "' passed to operation ==");
                         return ret_bool;
                     case "!=":
                         typecheck(e2, e1);
@@ -150,10 +150,10 @@ public class Interpreter {
                             ret_bool.value = i1.value != i2.value;
                         else
                             throw new TypeMismatchException(
-                                    "unexpected type " + e1.getClass().getSimpleName() + " passed to operation !=");
+                                    "unexpected type '" + e1.getClass().getSimpleName() + "' passed to operation !=");
                         return ret_bool;
                     default:
-                        throw new UnknownCommandException("unknown operation " + ((Symbol) bop.op).value);
+                        throw new UnknownCommandException("unknown operation '" + ((Symbol) bop.op).value + "'");
                 }
             }
             case Not not -> {
@@ -261,11 +261,9 @@ public class Interpreter {
                         } else
                             return null;
                     case "isEmpty":
-                        Bool empty = new Bool(oplis.lis.isEmpty());
-                        return empty;
+                        return new Bool(oplis.lis.isEmpty());
                     case "length":
-                        Int length = new Int(oplis.lis.size());
-                        return length;
+                        return new Int(oplis.lis.size());
                     case "append":
                         Expression list1 = eval(lop.arg, env);
                         typecheck(list1, newList);
@@ -326,7 +324,7 @@ public class Interpreter {
                         }
                         return re;
                     default:
-                        throw new UnknownCommandException("unknown list operation " + lop.operation);
+                        throw new UnknownCommandException("unknown list operation '" + lop.operation + "'");
                 }
             }
             default -> throw new UnknownCommandException(null);
@@ -335,8 +333,8 @@ public class Interpreter {
 
     private static void typecheck(Expression actualType, Expression expectedType) throws TypeMismatchException {
         if (!actualType.getClass().equals(expectedType.getClass()))
-            throw new TypeMismatchException("expected type " + expectedType.getClass().getSimpleName()
-                    + " but found type " + actualType.getClass().getSimpleName());
+            throw new TypeMismatchException("expected type '" + expectedType.getClass().getSimpleName()
+                    + "' but found type '" + actualType.getClass().getSimpleName() + "'");
     }
 
     private static List<Binding> bind(Binding bin, List<Binding> env) {
@@ -349,7 +347,7 @@ public class Interpreter {
         for (int i = env.size() - 1; i >= 0; i--)
             if (env.get(i).var.value.contentEquals(iden.value))
                 return env.get(i).value;
-        throw new NoBindingException("variable " + iden.value + " is not bound in scope");
+        throw new NoBindingException("variable '" + iden.value + "' is not bound in scope");
     }
 
     private static List<Binding> clone(List<Binding> oldList) {
