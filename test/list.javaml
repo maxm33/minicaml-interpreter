@@ -4,8 +4,32 @@ letrec search(elem lis count) =
         if op(head == elem) then count
         else apply(search elem List.tl lis op(count + 1) ;) ;;
 
+let pred_even = function x -> op(op(x % 2) == 0) ;;
+let doubler = function x -> op x * 2 ;;
+
+let list0 = [ ] ;;
 let list1 = [ 11,5,21,5,1,2 ] ;;
 let list2 = [ 3,2 ] ;;
+
+let head0 = List.hd list0 ;;
+let tail0 = List.tl list0 ;;
+
+let head1 = List.hd list1 ;;
+let tail1 = List.tl list1 ;;
+
+let list3 = List.map doubler list1 ;;
+let list3 = List.filter pred_even list1 ;;
 let list3 = List.append list1 list2 ;;
+
+let e = List.isEmpty list2 ;;
+let e = List.isEmpty list0 ;;
+
+let e = List.length list2 ;;
+let e = List.length list0 ;;
+
+let con = List.cons 5 list0 ;;
+
+let e = List.exists pred_even list2 ;;
+let e = List.forAll pred_even list1 ;;
 
 apply(search 21 list1 0 ;) ;;

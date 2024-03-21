@@ -44,7 +44,7 @@ public class Lexer {
                 tokens.add(new Token(TokenType.LIST_S, word));
             else if (word.matches("\\]"))
                 tokens.add(new Token(TokenType.LIST_E, word));
-            else if (word.matches("List.[a-zA-Z]+"))
+            else if (word.matches("List.[a-z][a-zA-Z]*"))
                 tokens.add(new Token(TokenType.LIST_OP, word));
             else if (word.contentEquals("op"))
                 tokens.add(new Token(TokenType.OP, word));
@@ -52,7 +52,7 @@ public class Lexer {
                 tokens.add(new Token(TokenType.NOT, word));
             else if (word.matches("\\+|-|\\*|/|&|\\||>|<|>=|<=|%|\\^|==|!="))
                 tokens.add(new Token(TokenType.SYMB, word));
-            else if (word.matches("[a-z]+[A-Z]*[0-9]*"))
+            else if (word.matches("[a-z]\\w*"))
                 tokens.add(new Token(TokenType.IDEN, word));
             else
                 throw new IllegalTokenException(

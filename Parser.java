@@ -46,9 +46,9 @@ public class Parser {
                 case LIST_S:
                     return parseList(tokens);
                 case LIST_OP:
-                    return parseListOP(tokens);
+                    return parseListOp(tokens);
                 case OP:
-                    return parseBinaryOP(tokens);
+                    return parseBinaryOp(tokens);
                 case NOT:
                     return parseNot(tokens);
                 case IDEN:
@@ -61,14 +61,12 @@ public class Parser {
     }
 
     private static Int parseInt(Token token) {
-        Int i = new Int();
-        i.value = (Integer.parseInt(token.value));
+        Int i = new Int(Integer.parseInt(token.value));
         return i;
     }
 
     private static Bool parseBool(Token token) {
-        Bool b = new Bool();
-        b.value = (Boolean.parseBoolean(token.value));
+        Bool b = new Bool(Boolean.parseBoolean(token.value));
         return b;
     }
 
@@ -137,62 +135,32 @@ public class Parser {
         return l;
     }
 
-    private static Expression parseListOP(Queue<Token> tokens) throws WrongSyntaxException {
+    private static Expression parseListOp(Queue<Token> tokens) throws WrongSyntaxException {
         String[] s = tokens.remove().value.split("\\.");
-        String operation = s[1];
-        switch (operation) {
-            case "cons":
-                ListCons cons = new ListCons();
-                cons.element = parseExpression(tokens);
-                cons.list = parseExpression(tokens);
-                return cons;
+        ListOp lop = new ListOp();
+        lop.operation = s[1];
+        switch (lop.operation) {
             case "hd":
-                ListHead head = new ListHead();
-                head.list = parseExpression(tokens);
-                return head;
             case "tl":
-                ListTail tail = new ListTail();
-                tail.list = parseExpression(tokens);
-                return tail;
             case "isEmpty":
-                ListEmpty empty = new ListEmpty();
-                empty.list = parseExpression(tokens);
-                return empty;
             case "length":
-                ListLength length = new ListLength();
-                length.list = parseExpression(tokens);
-                return length;
+                lop.list = parseExpression(tokens);
+                return lop;
+            case "cons":
             case "append":
-                ListAppend append = new ListAppend();
-                append.list1 = parseExpression(tokens);
-                append.list2 = parseExpression(tokens);
-                return append;
             case "map":
-                ListMap map = new ListMap();
-                map.function = parseExpression(tokens);
-                map.list = parseExpression(tokens);
-                return map;
             case "filter":
-                ListFilter filter = new ListFilter();
-                filter.function = parseExpression(tokens);
-                filter.list = parseExpression(tokens);
-                return filter;
             case "exists":
-                ListExists exists = new ListExists();
-                exists.function = parseExpression(tokens);
-                exists.list = parseExpression(tokens);
-                return exists;
             case "forAll":
-                ListForAll forAll = new ListForAll();
-                forAll.function = parseExpression(tokens);
-                forAll.list = parseExpression(tokens);
-                return forAll;
+                lop.arg = parseExpression(tokens);
+                lop.list = parseExpression(tokens);
+                return lop;
             default:
-                throw new WrongSyntaxException("invalid list operation " + s[0] + "." + operation);
+                throw new WrongSyntaxException("invalid list operation " + s[0] + "." + lop.operation);
         }
     }
 
-    private static Expression parseBinaryOP(Queue<Token> tokens) throws WrongSyntaxException {
+    private static Expression parseBinaryOp(Queue<Token> tokens) throws WrongSyntaxException {
         Operation bop = new Operation();
         parseToken(tokens, new Token(TokenType.OP, "op"));
         bop.e1 = parseExpression(tokens);
@@ -209,8 +177,7 @@ public class Parser {
     }
 
     private static Iden parseIden(Token token) {
-        Iden id = new Iden();
-        id.value = token.value;
+        Iden id = new Iden(token.value);
         return id;
     }
 
@@ -261,8 +228,7 @@ public class Parser {
                 case "^":
                 case "==":
                 case "!=":
-                    Symbol s = new Symbol();
-                    s.value = nextToken.value;
+                    Symbol s = new Symbol(nextToken.value);
                     return s;
                 default:
                     throw new WrongSyntaxException("unexpected operation symbol " + nextToken.value);

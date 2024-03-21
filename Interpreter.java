@@ -231,128 +231,103 @@ public class Interpreter {
                         }
                         return eval(rec.body, extFenv);
                     }
-                    default -> throw new TypeMismatchException("not a functional value passed to apply");
+                    default -> throw new TypeMismatchException("not a functional value passed");
                 }
             }
-            case ListCons op -> {
-                Expression element = eval(op.element, env);
-                Expression list = eval(op.list, env);
-                typecheck(list, new Lis());
-                if (((Lis) list).type == null)
-                    ((Lis) list).type = element;
-                typecheck(element, ((Lis) list).type);
+            case ListOp lop -> {
                 Lis newList = new Lis();
-                newList.type = ((Lis) list).type;
-                newList.lis = (LinkedList<Expression>) ((Lis) list).lis.clone();
-                newList.lis.addFirst(element);
-                return newList;
-            }
-            case ListHead op -> {
-                Expression list = eval(op.list, env);
-                typecheck(list, new Lis());
-                Expression head = ((Lis) list).lis.peek();
-                return head;
-            }
-            case ListTail op -> {
-                Expression list = eval(op.list, env);
-                typecheck(list, new Lis());
-                Lis newList = new Lis();
-                newList.type = ((Lis) list).type;
-                newList.lis = (LinkedList<Expression>) ((Lis) list).lis.clone();
-                newList.lis.removeFirst();
-                return newList;
-            }
-            case ListEmpty op -> {
-                Expression list = eval(op.list, env);
-                typecheck(list, new Lis());
-                Bool empty = new Bool();
-                empty.value = ((Lis) list).lis.isEmpty();
-                return empty;
-            }
-            case ListLength op -> {
-                Expression list = eval(op.list, env);
-                typecheck(list, new Lis());
-                Int length = new Int();
-                length.value = ((Lis) list).lis.size();
-                return length;
-            }
-            case ListAppend op -> {
-                Expression list1 = eval(op.list1, env);
-                Expression list2 = eval(op.list2, env);
-                typecheck(list1, new Lis());
-                typecheck(list2, new Lis());
-                if (!((Lis) list1).lis.isEmpty() && !((Lis) list2).lis.isEmpty())
-                    typecheck(((Lis) list2).type, ((Lis) list1).type);
-                Lis newList = new Lis();
-                newList.type = ((Lis) list1).type;
-                newList.lis = (LinkedList<Expression>) ((Lis) list1).lis.clone();
-                for (Expression elem : ((Lis) list2).lis)
-                    newList.lis.addLast(elem);
-                return newList;
-            }
-            case ListMap op -> {
-                Expression list = eval(op.list, env);
-                typecheck(list, new Lis());
-                Lis newList = new Lis();
-                for (Expression elem : ((Lis) list).lis) {
-                    Apply app = new Apply();
-                    app.actualParams = new ArrayList<Expression>();
-                    app.actualParams.add(elem);
-                    app.iden = op.function;
-                    Expression newElem = eval(app, env);
-                    newList.lis.addLast(newElem);
+                Expression list = eval(lop.list, env);
+                typecheck(list, newList);
+                Lis oplis = (Lis) list;
+                switch (lop.operation) {
+                    case "cons":
+                        Expression element = eval(lop.arg, env);
+                        if (oplis.type == null)
+                            oplis.type = element;
+                        else
+                            typecheck(element, oplis.type);
+                        newList.type = oplis.type;
+                        newList.lis = (LinkedList<Expression>) oplis.lis.clone();
+                        newList.lis.addFirst(element);
+                        return newList;
+                    case "hd":
+                        return oplis.lis.peek();
+                    case "tl":
+                        if (!oplis.lis.isEmpty()) {
+                            newList.type = oplis.type;
+                            newList.lis = (LinkedList<Expression>) oplis.lis.clone();
+                            newList.lis.removeFirst();
+                            return newList;
+                        } else
+                            return null;
+                    case "isEmpty":
+                        Bool empty = new Bool(oplis.lis.isEmpty());
+                        return empty;
+                    case "length":
+                        Int length = new Int(oplis.lis.size());
+                        return length;
+                    case "append":
+                        Expression list1 = eval(lop.arg, env);
+                        typecheck(list1, newList);
+                        Lis arglis = (Lis) list1;
+                        if (!oplis.lis.isEmpty() && !arglis.lis.isEmpty())
+                            typecheck(oplis.type, arglis.type);
+                        newList.type = arglis.type;
+                        newList.lis = (LinkedList<Expression>) arglis.lis.clone();
+                        for (Expression elem : oplis.lis)
+                            newList.lis.addLast(elem);
+                        return newList;
+                    case "map":
+                        for (Expression elem : oplis.lis) {
+                            Apply app = new Apply();
+                            app.actualParams = new ArrayList<Expression>();
+                            app.actualParams.add(elem);
+                            app.iden = lop.arg;
+                            Expression newElem = eval(app, env);
+                            newList.lis.addLast(newElem);
+                        }
+                        return newList;
+                    case "filter":
+                        for (Expression elem : oplis.lis) {
+                            Apply app = new Apply();
+                            app.actualParams = new ArrayList<Expression>();
+                            app.actualParams.add(elem);
+                            app.iden = lop.arg;
+                            Expression result = eval(app, env);
+                            typecheck(result, new Bool());
+                            if (((Bool) result).value == true)
+                                newList.lis.addLast(elem);
+                        }
+                        return newList;
+                    case "exists":
+                        Bool ret = new Bool(false);
+                        for (Expression elem : oplis.lis) {
+                            Apply app = new Apply();
+                            app.actualParams = new ArrayList<Expression>();
+                            app.actualParams.add(elem);
+                            app.iden = lop.arg;
+                            Expression result = eval(app, env);
+                            typecheck(result, ret);
+                            if (((Bool) result).value == true)
+                                ret.value = true;
+                        }
+                        return ret;
+                    case "forAll":
+                        Bool re = new Bool(true);
+                        for (Expression elem : oplis.lis) {
+                            Apply app = new Apply();
+                            app.actualParams = new ArrayList<Expression>();
+                            app.actualParams.add(elem);
+                            app.iden = lop.arg;
+                            Expression result = eval(app, env);
+                            typecheck(result, re);
+                            if (((Bool) result).value == false)
+                                re.value = false;
+                        }
+                        return re;
+                    default:
+                        throw new UnknownCommandException("unknown list operation " + lop.operation);
                 }
-                return newList;
-            }
-            case ListFilter op -> {
-                Expression list = eval(op.list, env);
-                typecheck(list, new Lis());
-                Lis newList = new Lis();
-                for (Expression elem : ((Lis) list).lis) {
-                    Apply app = new Apply();
-                    app.actualParams = new ArrayList<Expression>();
-                    app.actualParams.add(elem);
-                    app.iden = op.function;
-                    Expression result = eval(app, env);
-                    typecheck(result, new Bool());
-                    if (((Bool) result).value == true)
-                        newList.lis.addLast(elem);
-                }
-                return newList;
-            }
-            case ListExists op -> {
-                Expression list = eval(op.list, env);
-                typecheck(list, new Lis());
-                Bool ret = new Bool();
-                ret.value = false;
-                for (Expression elem : ((Lis) list).lis) {
-                    Apply app = new Apply();
-                    app.actualParams = new ArrayList<Expression>();
-                    app.actualParams.add(elem);
-                    app.iden = op.function;
-                    Expression result = eval(app, env);
-                    typecheck(result, ret);
-                    if (((Bool) result).value == true)
-                        ret.value = true;
-                }
-                return ret;
-            }
-            case ListForAll op -> {
-                Expression list = eval(op.list, env);
-                typecheck(list, new Lis());
-                Bool ret = new Bool();
-                ret.value = true;
-                for (Expression elem : ((Lis) list).lis) {
-                    Apply app = new Apply();
-                    app.actualParams = new ArrayList<Expression>();
-                    app.actualParams.add(elem);
-                    app.iden = op.function;
-                    Expression result = eval(app, env);
-                    typecheck(result, ret);
-                    if (((Bool) result).value == false)
-                        ret.value = false;
-                }
-                return ret;
             }
             default -> throw new UnknownCommandException(null);
         }
@@ -360,7 +335,8 @@ public class Interpreter {
 
     private static void typecheck(Expression actualType, Expression expectedType) throws TypeMismatchException {
         if (!actualType.getClass().equals(expectedType.getClass()))
-            throw new TypeMismatchException("expected type " + expectedType.getClass().getSimpleName() + " but found type " + actualType.getClass().getSimpleName());
+            throw new TypeMismatchException("expected type " + expectedType.getClass().getSimpleName()
+                    + " but found type " + actualType.getClass().getSimpleName());
     }
 
     private static List<Binding> bind(Binding bin, List<Binding> env) {
@@ -425,7 +401,10 @@ public class Interpreter {
             Queue<Token> tokens = Lexer.tokenize(block);
             Expression exp = Parser.parse(tokens);
             Expression result = eval(exp, env);
-            System.out.println("-: " + result.getClass().getSimpleName() + " = " + printExpression(result));
+            if (result != null)
+                System.out.println("-: " + result.getClass().getSimpleName() + " = " + printExpression(result));
+            else
+                System.out.println("-: null");
         }
     }
 }
