@@ -41,14 +41,12 @@ public class Parser {
                     return parseIf(tokens);
                 case FUN:
                     return parseFunction(tokens);
-                case APPLY:
-                    return parseApply(tokens);
+                case LPAR:
+                    return parsePar(tokens);
                 case LIST_S:
                     return parseList(tokens);
                 case LIST_OP:
                     return parseListOp(tokens);
-                case OP:
-                    return parseBinaryOp(tokens);
                 case NOT:
                     return parseNot(tokens);
                 case IDEN:
@@ -119,13 +117,27 @@ public class Parser {
         return fun;
     }
 
-    private static Expression parseApply(Queue<Token> tokens) throws WrongSyntaxException {
-        Apply app = new Apply();
-        parseToken(tokens, new Token(TokenType.APPLY, "apply"));
-        app.iden = parseExpression(tokens);
-        app.actualParams = parseListOfParams(tokens, new Token(TokenType.END_PARAM, ";"));
-        parseToken(tokens, new Token(TokenType.END_PARAM, ";"));
-        return app;
+    private static Expression parsePar(Queue<Token> tokens) throws WrongSyntaxException {
+        parseToken(tokens, new Token(TokenType.LPAR, "("));
+        Expression firstElem = parseExpression(tokens);
+        nextToken = tokens.peek();
+        if (nextToken.type == TokenType.SYMB) {
+            Operation bop = new Operation();
+            bop.e1 = firstElem;
+            bop.op = parseSymbol(tokens);
+            bop.e2 = parseExpression(tokens);
+            parseToken(tokens, new Token(TokenType.RPAR, ")"));
+            return bop;
+        } else if (nextToken.type != TokenType.RPAR) {
+            FunctionalApplication app = new FunctionalApplication();
+            app.iden = firstElem;
+            app.actualParams = parseListOfParams(tokens, new Token(TokenType.RPAR, ")"));
+            parseToken(tokens, new Token(TokenType.RPAR, ")"));
+            return app;
+        } else {
+            parseToken(tokens, new Token(TokenType.RPAR, ")"));
+            return firstElem;
+        }
     }
 
     private static Lis parseList(Queue<Token> tokens) throws WrongSyntaxException {
@@ -159,15 +171,6 @@ public class Parser {
             default:
                 throw new WrongSyntaxException("invalid list operation '" + s[0] + "." + lop.operation + "'");
         }
-    }
-
-    private static Expression parseBinaryOp(Queue<Token> tokens) throws WrongSyntaxException {
-        Operation bop = new Operation();
-        parseToken(tokens, new Token(TokenType.OP, "op"));
-        bop.e1 = parseExpression(tokens);
-        bop.op = parseSymbol(tokens);
-        bop.e2 = parseExpression(tokens);
-        return bop;
     }
 
     private static Expression parseNot(Queue<Token> tokens) throws WrongSyntaxException {

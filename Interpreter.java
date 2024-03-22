@@ -201,7 +201,7 @@ public class Interpreter {
                     return closure;
                 }
             }
-            case Apply app -> {
+            case FunctionalApplication app -> {
                 int i = 0;
                 Expression closure = eval(app.iden, env);
                 switch (closure) {
@@ -277,7 +277,7 @@ public class Interpreter {
                         return newList;
                     case "map":
                         for (Expression elem : oplis.lis) {
-                            Apply app = new Apply();
+                            FunctionalApplication app = new FunctionalApplication();
                             app.actualParams = new ArrayList<Expression>();
                             app.actualParams.add(elem);
                             app.iden = lop.arg;
@@ -287,7 +287,7 @@ public class Interpreter {
                         return newList;
                     case "filter":
                         for (Expression elem : oplis.lis) {
-                            Apply app = new Apply();
+                            FunctionalApplication app = new FunctionalApplication();
                             app.actualParams = new ArrayList<Expression>();
                             app.actualParams.add(elem);
                             app.iden = lop.arg;
@@ -300,7 +300,7 @@ public class Interpreter {
                     case "exists":
                         Bool ret = new Bool(false);
                         for (Expression elem : oplis.lis) {
-                            Apply app = new Apply();
+                            FunctionalApplication app = new FunctionalApplication();
                             app.actualParams = new ArrayList<Expression>();
                             app.actualParams.add(elem);
                             app.iden = lop.arg;
@@ -313,7 +313,7 @@ public class Interpreter {
                     case "forAll":
                         Bool re = new Bool(true);
                         for (Expression elem : oplis.lis) {
-                            Apply app = new Apply();
+                            FunctionalApplication app = new FunctionalApplication();
                             app.actualParams = new ArrayList<Expression>();
                             app.actualParams.add(elem);
                             app.iden = lop.arg;
@@ -394,15 +394,17 @@ public class Interpreter {
             return;
         }
         String program = Files.readString(Paths.get(args[0]));
+        String[] blocks = program.split("(?<=\\s+;;)");
         List<Binding> env = new ArrayList<Binding>();
 
-        String[] blocks = program.split("(?<=\\s+;;)");
         System.out.println();
         for (String block : blocks) {
             System.out.println(block + "\n");
+
             Queue<Token> tokens = Lexer.tokenize(block);
             Expression exp = Parser.parse(tokens);
             Expression result = eval(exp, env);
+
             if (result != null)
                 System.out.println("-: " + result.getClass().getSimpleName() + " = " + printExpression(result));
             else
