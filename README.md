@@ -9,9 +9,9 @@ However, MiniCaml offers constructs for control-flow, declaration of variables, 
 
 Every program must start with an expression `e ;;` from which can derive as follows:
 
-- **e**&emsp;:=&emsp;**val**&ensp;|&ensp;**ide**&ensp;|&ensp;**ListOp**&ensp;|&ensp;(**e**)&ensp;|&ensp;(**e** **op** **e**)&ensp;|&ensp;(**ide** **e<sub>1</sub> ... e<sub>16</sub>**)&ensp;|&ensp;**e** ;; **e**&ensp;|&ensp;! **e**&ensp;|&ensp;if **e** then **e** else **e**&ensp;|&ensp;let **ide** = **e**&ensp;|&ensp;let **ide** = **e** in **e**&ensp;|&ensp;letrec **ide** **ide<sub>1</sub> ... ide<sub>16</sub>** = **e** in **e**<br>
+- **e**&emsp;:=&emsp;**val**&ensp;|&ensp;**ide**&ensp;|&ensp;**ListOp**&ensp;|&ensp;(**e**)&ensp;|&ensp;(**e** **op** **e**)&ensp;|&ensp;(**ide** **e<sub>1</sub> ... e<sub>16</sub>**)&ensp;|&ensp;**e** ;; **e**&ensp;|&ensp;!**e**&ensp;|&ensp;if **e** then **e** else **e**&ensp;|&ensp;let **ide** = **e**&ensp;|&ensp;let **ide** = **e** in **e**&ensp;|&ensp;let rec **ide** **ide<sub>1</sub> ... ide<sub>16</sub>** = **e** in **e**<br>
 - **ListOp**&emsp;:=&emsp;List.cons **e** **e**&ensp;|&ensp;List.hd **e**&ensp;|&ensp;List.tl **e**&ensp;|&ensp;List.isEmpty **e**&ensp;|&ensp;List.length **e**&ensp;|&ensp;List.append **e** **e**&ensp;|&ensp;List.map **e** **e**&ensp;|&ensp;List.filter **e** **e**&ensp;|&ensp;List.exists **e** **e**&ensp;|&ensp;List.forAll **e** **e**&ensp;|&ensp;List.rev **e**<br>
-- **val**&emsp;:=&emsp;_Int_&ensp;|&ensp;_Bool_&ensp;|&ensp;function **ide<sub>1</sub> ... ide<sub>16</sub>** -> **e**&ensp;|&ensp;letrec **ide** **ide<sub>1</sub> ... ide<sub>16</sub>** = **e**&ensp;|&ensp;[**e<sub>0</sub> ... e<sub>n-1</sub>**]<br>
+- **val**&emsp;:=&emsp;_Int_&ensp;|&ensp;_Bool_&ensp;|&ensp;function **ide<sub>1</sub> ... ide<sub>16</sub>** -> **e**&ensp;|&ensp;let rec **ide** **ide<sub>1</sub> ... ide<sub>16</sub>** = **e**&ensp;|&ensp;[**e<sub>0</sub> ... e<sub>n-1</sub>**]<br>
 - **op**&emsp;:=&emsp;**+**&ensp;|&ensp;**-**&ensp;|&ensp;\*&ensp;|&ensp;**/**&ensp;|&ensp;**&**&ensp;|&ensp;**|**&ensp;|&ensp;**>**&ensp;|&ensp;<&ensp;|&ensp;**>=**&ensp;|&ensp;<=&ensp;|&ensp;**%**&ensp;|&ensp;**^**&ensp;|&ensp;**==**&ensp;|&ensp;**!=**<br>
 - **ide**&emsp;:=&emsp;_Identifiers_<br>
 

@@ -1,14 +1,17 @@
 ((1 + 3) * (2 - (16 / 8))) ;;
 
-((2 > 1) | ! ( ! (true != (4 < 6)) == (false & false))) ;;
+((2 > 1) | !(( !true != (4 < 6)) == (false & false))) ;;
 
-[] ;;
+[[(99)]] ;;
+[88] ;;
+
+!(List.isEmpty [88]) ;;
 
 let lis = [1,2,3,4,5] ;;
 
 let var = (1 - 2) in (var * 6) ;;
 
-letrec fact n = 
+let rec fact n = 
     if (n < 2) then 1 
 	else (n * (fact (n - 1))) ;;
 

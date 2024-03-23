@@ -33,8 +33,6 @@ public class Parser {
                     return parseInt(tokens.remove());
                 case BOOL:
                     return parseBool(tokens.remove());
-                case REC:
-                    return parseRec(tokens);
                 case LET:
                     return parseLet(tokens);
                 case IF:
@@ -70,9 +68,24 @@ public class Parser {
         return new Iden(token.value);
     }
 
+    private static Expression parseLet(Queue<Token> tokens) throws WrongSyntaxException {
+        parseToken(tokens, new Token(TokenType.LET, "let"));
+        if (tokens.peek().type == TokenType.REC)
+            return parseRec(tokens);
+        Let let = new Let();
+        let.var = parseExpression(tokens);
+        parseToken(tokens, new Token(TokenType.EQ, "="));
+        let.value = parseExpression(tokens);
+        if (tokens.peek().type != TokenType.END_BLOCK) {
+            parseToken(tokens, new Token(TokenType.IN, "in"));
+            let.body = parseExpression(tokens);
+        }
+        return let;
+    }
+
     private static Expression parseRec(Queue<Token> tokens) throws WrongSyntaxException {
         Letrec rec = new Letrec();
-        parseToken(tokens, new Token(TokenType.REC, "letrec"));
+        parseToken(tokens, new Token(TokenType.REC, "rec"));
         rec.name = parseExpression(tokens);
         rec.params = parseListOfParams(tokens, new Token(TokenType.EQ, "="));
         parseToken(tokens, new Token(TokenType.EQ, "="));
@@ -82,19 +95,6 @@ public class Parser {
             rec.letbody = parseExpression(tokens);
         }
         return rec;
-    }
-
-    private static Expression parseLet(Queue<Token> tokens) throws WrongSyntaxException {
-        Let let = new Let();
-        parseToken(tokens, new Token(TokenType.LET, "let"));
-        let.var = parseExpression(tokens);
-        parseToken(tokens, new Token(TokenType.EQ, "="));
-        let.value = parseExpression(tokens);
-        if (tokens.peek().type != TokenType.END_BLOCK) {
-            parseToken(tokens, new Token(TokenType.IN, "in"));
-            let.body = parseExpression(tokens);
-        }
-        return let;
     }
 
     private static Expression parseIf(Queue<Token> tokens) throws WrongSyntaxException {

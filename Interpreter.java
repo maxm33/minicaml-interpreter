@@ -393,6 +393,10 @@ public class Interpreter {
             System.err.println("\nNo path was provided.\nUsage: java Interpreter <path-to-file>");
             return;
         }
+        if (!args[0].endsWith(".ml")) {
+            System.err.println("\nFile is not a .ml file");
+            return;
+        }
         String program = Files.readString(Paths.get(args[0]));
         String[] blocks = program.split("(?<=\\s+;;)");
         List<Binding> env = new ArrayList<Binding>();

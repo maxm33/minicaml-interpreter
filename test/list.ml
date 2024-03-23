@@ -1,4 +1,4 @@
-letrec search elem lis count =
+let rec search elem lis count =
     if (List.isEmpty lis) then -1
     else let head = (List.hd lis) in
         if (head == elem) then count
