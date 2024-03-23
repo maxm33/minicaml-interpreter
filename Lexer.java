@@ -82,7 +82,7 @@ public class Lexer {
             int index = word.indexOf("]");
             matchToken(word.substring(0, index));
             matchToken(word.substring(index, word.length()));
-        } else if (word.matches("\\[+[\\w\\(\\)\\.]+\\]+")) {
+        } else if (word.matches("\\[+[\\w\\(\\)\\.]*\\]+")) {
             int index_1 = word.lastIndexOf("[");
             matchToken(word.substring(0, index_1 + 1));
             int index_2 = word.indexOf("]");
