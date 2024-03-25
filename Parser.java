@@ -74,6 +74,8 @@ public class Parser {
             return parseRec(tokens);
         Let let = new Let();
         let.var = parseExpression(tokens);
+        if (tokens.peek().type != TokenType.EQ)
+            let.params = parseListOfParams(tokens, new Token(TokenType.EQ, "="));
         parseToken(tokens, new Token(TokenType.EQ, "="));
         let.value = parseExpression(tokens);
         if (tokens.peek().type != TokenType.END_BLOCK) {
@@ -154,13 +156,15 @@ public class Parser {
         ListOp lop = new ListOp();
         lop.operation = s[1];
         switch (lop.operation) {
+            case "fold":
+                lop.arg_1 = parseExpression(tokens);
             case "cons":
             case "append":
             case "map":
             case "filter":
             case "exists":
             case "forAll":
-                lop.arg = parseExpression(tokens);
+                lop.arg_2 = parseExpression(tokens);
             case "hd":
             case "tl":
             case "isEmpty":

@@ -9,9 +9,9 @@ However, MiniCaml offers constructs for control-flow, declaration of variables, 
 
 Every program must start with an expression `e ;;` from which can derive as follows:
 
-- **e**&emsp;:=&emsp;**val**&ensp;|&ensp;**ide**&ensp;|&ensp;**ListOp**&ensp;|&ensp;(**e**)&ensp;|&ensp;(**e** **op** **e**)&ensp;|&ensp;(**ide** **e<sub>1</sub> ... e<sub>16</sub>**)&ensp;|&ensp;**e** ;; **e**&ensp;|&ensp;!**e**&ensp;|&ensp;if **e** then **e** else **e**&ensp;|&ensp;let **ide** = **e**&ensp;|&ensp;let **ide** = **e** in **e**&ensp;|&ensp;let rec **ide** **ide<sub>1</sub> ... ide<sub>16</sub>** = **e** in **e**<br>
-- **ListOp**&emsp;:=&emsp;List.cons **e** **e**&ensp;|&ensp;List.hd **e**&ensp;|&ensp;List.tl **e**&ensp;|&ensp;List.isEmpty **e**&ensp;|&ensp;List.length **e**&ensp;|&ensp;List.append **e** **e**&ensp;|&ensp;List.map **e** **e**&ensp;|&ensp;List.filter **e** **e**&ensp;|&ensp;List.exists **e** **e**&ensp;|&ensp;List.forAll **e** **e**&ensp;|&ensp;List.rev **e**<br>
-- **val**&emsp;:=&emsp;_Int_&ensp;|&ensp;_Bool_&ensp;|&ensp;function **ide<sub>1</sub> ... ide<sub>16</sub>** -> **e**&ensp;|&ensp;let rec **ide** **ide<sub>1</sub> ... ide<sub>16</sub>** = **e**&ensp;|&ensp;[**e<sub>0</sub> ... e<sub>n-1</sub>**]<br>
+- **e**&emsp;:=&emsp;**val**&ensp;|&ensp;**ide**&ensp;|&ensp;**ListOp**&ensp;|&ensp;(**e**)&ensp;|&ensp;(**e** **op** **e**)&ensp;|&ensp;(**ide** **e<sub>1</sub> ... e<sub>16</sub>**)&ensp;|&ensp;**e** ;; **e**&ensp;|&ensp;!**e**&ensp;|&ensp;if **e** then **e** else **e**&ensp;|&ensp;let _rec_ **ide** _**ide<sub>1</sub> ... ide<sub>16</sub>**_ = **e** _in **e**_&ensp;|&ensp;function **ide<sub>1</sub> ... ide<sub>16</sub>** -> **e**<br>
+- **ListOp**&emsp;:=&emsp;List.hd **e**&ensp;|&ensp;List.tl **e**&ensp;|&ensp;List.rev **e**&ensp;|&ensp;List.isEmpty **e**&ensp;|&ensp;List.length **e**&ensp;|&ensp;List.cons **e** **e**&ensp;|&ensp;List.append **e** **e**&ensp;|&ensp;List.map **e** **e**&ensp;|&ensp;List.filter **e** **e**&ensp;|&ensp;List.exists **e** **e**&ensp;|&ensp;List.forAll **e** **e**&ensp;|&ensp;List.fold **e** **e** **e**<br>
+- **val**&emsp;:=&emsp;_Int_&ensp;|&ensp;_Bool_&ensp;|&ensp;_Closure_&ensp;|&ensp;_RecClosure_&ensp;|&ensp;[**e<sub>0</sub> ... e<sub>n-1</sub>**]<br>
 - **op**&emsp;:=&emsp;**+**&ensp;|&ensp;**-**&ensp;|&ensp;\*&ensp;|&ensp;**/**&ensp;|&ensp;**&**&ensp;|&ensp;**|**&ensp;|&ensp;**>**&ensp;|&ensp;<&ensp;|&ensp;**>=**&ensp;|&ensp;<=&ensp;|&ensp;**%**&ensp;|&ensp;**^**&ensp;|&ensp;**==**&ensp;|&ensp;**!=**<br>
 - **ide**&emsp;:=&emsp;_Identifiers_<br>
 
@@ -19,6 +19,9 @@ Every program must start with an expression `e ;;` from which can derive as foll
 > You can refer to OCaml documentation for any doubt, since it should be almost equivalent to this lexic, syntax and semantics.
 
 As in OCaml, functions in MiniCaml are treated as values, so they can be passed as arguments to or returned from other functions, or stored in variables/lists.<br>
+
+> [!NOTE]
+> '(&ensp;&ensp;)' can surround any expression (just one), but they are also necessary to define operations and functional applications, so use them wisely.
 
 ## Usage
 

@@ -173,6 +173,12 @@ public class Interpreter {
             }
             case Let let -> {
                 typecheck(let.var, new Iden());
+                if (let.params != null) {
+                    Function fun = new Function();
+                    fun.formalParams = let.params;
+                    fun.body = let.value;
+                    let.value = fun;
+                }
                 Expression value = eval(let.value, env);
                 Binding bin = new Binding((Iden) let.var, value);
                 // creating a new env for the 'in' scope
@@ -241,7 +247,7 @@ public class Interpreter {
                 Lis oplis = (Lis) list;
                 switch (lop.operation) {
                     case "cons":
-                        Expression element = eval(lop.arg, env);
+                        Expression element = eval(lop.arg_2, env);
                         if (oplis.type == null)
                             oplis.type = element;
                         else
@@ -265,7 +271,7 @@ public class Interpreter {
                     case "length":
                         return new Int(oplis.lis.size());
                     case "append":
-                        Expression list1 = eval(lop.arg, env);
+                        Expression list1 = eval(lop.arg_2, env);
                         typecheck(list1, newList);
                         Lis arglis = (Lis) list1;
                         if (!oplis.lis.isEmpty() && !arglis.lis.isEmpty())
@@ -280,7 +286,7 @@ public class Interpreter {
                             FunctionalApplication app = new FunctionalApplication();
                             app.actualParams = new ArrayList<Expression>();
                             app.actualParams.add(elem);
-                            app.iden = lop.arg;
+                            app.iden = lop.arg_2;
                             Expression newElem = eval(app, env);
                             newList.lis.addLast(newElem);
                         }
@@ -290,7 +296,7 @@ public class Interpreter {
                             FunctionalApplication app = new FunctionalApplication();
                             app.actualParams = new ArrayList<Expression>();
                             app.actualParams.add(elem);
-                            app.iden = lop.arg;
+                            app.iden = lop.arg_2;
                             Expression result = eval(app, env);
                             typecheck(result, new Bool());
                             if (((Bool) result).value == true)
@@ -303,7 +309,7 @@ public class Interpreter {
                             FunctionalApplication app = new FunctionalApplication();
                             app.actualParams = new ArrayList<Expression>();
                             app.actualParams.add(elem);
-                            app.iden = lop.arg;
+                            app.iden = lop.arg_2;
                             Expression result = eval(app, env);
                             typecheck(result, ret);
                             if (((Bool) result).value == true)
@@ -316,13 +322,29 @@ public class Interpreter {
                             FunctionalApplication app = new FunctionalApplication();
                             app.actualParams = new ArrayList<Expression>();
                             app.actualParams.add(elem);
-                            app.iden = lop.arg;
+                            app.iden = lop.arg_2;
                             Expression result = eval(app, env);
                             typecheck(result, re);
                             if (((Bool) result).value == false)
                                 re.value = false;
                         }
                         return re;
+                    case "fold":
+                        Expression firstAcc = eval(lop.arg_2, env);
+                        Expression newAcc = null;
+                        for (Expression elem : oplis.lis) {
+                            FunctionalApplication app = new FunctionalApplication();
+                            app.actualParams = new ArrayList<Expression>();
+                            app.actualParams.add(elem);
+                            if (newAcc == null)
+                                app.actualParams.add(firstAcc);
+                            else
+                                app.actualParams.add(newAcc);
+                            app.iden = lop.arg_1;
+                            newAcc = eval(app, env);
+                            typecheck(newAcc, firstAcc);
+                        }
+                        return newAcc;
                     case "rev":
                         for (Expression elem : oplis.lis)
                             newList.lis.addFirst(elem);
