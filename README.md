@@ -11,9 +11,9 @@ Every program must start with an expression `e ;;` from which can derive as foll
 
 - **e**&emsp;:=&emsp;**val**&ensp;|&ensp;**ide**&ensp;|&ensp;**ListOp**&ensp;|&ensp;(**e**)&ensp;|&ensp;(**e** **op** **e**)&ensp;|&ensp;(**ide** **e<sub>1</sub> ... e<sub>16</sub>**)&ensp;|&ensp;**e** ;; **e**&ensp;|&ensp;!**e**&ensp;|&ensp;if **e** then **e** else **e**&ensp;|&ensp;let _rec_ **ide** _**ide<sub>1</sub> ... ide<sub>16</sub>**_ = **e** _in **e**_&ensp;|&ensp;function **ide<sub>1</sub> ... ide<sub>16</sub>** -> **e**<br>
 - **ListOp**&emsp;:=&emsp;List.hd **e**&ensp;|&ensp;List.tl **e**&ensp;|&ensp;List.rev **e**&ensp;|&ensp;List.isEmpty **e**&ensp;|&ensp;List.length **e**&ensp;|&ensp;List.cons **e** **e**&ensp;|&ensp;List.append **e** **e**&ensp;|&ensp;List.map **e** **e**&ensp;|&ensp;List.filter **e** **e**&ensp;|&ensp;List.exists **e** **e**&ensp;|&ensp;List.forAll **e** **e**&ensp;|&ensp;List.fold **e** **e** **e**<br>
-- **val**&emsp;:=&emsp;_Int_&ensp;|&ensp;_Bool_&ensp;|&ensp;_Closure_&ensp;|&ensp;_RecClosure_&ensp;|&ensp;[**e<sub>0</sub> ... e<sub>n-1</sub>**]<br>
+- **val**&emsp;:=&emsp;Int&ensp;|&ensp;Bool&ensp;|&ensp;Closure&ensp;|&ensp;RecClosure&ensp;|&ensp;[**e<sub>0</sub> ... e<sub>n-1</sub>**]<br>
 - **op**&emsp;:=&emsp;**+**&ensp;|&ensp;**-**&ensp;|&ensp;\*&ensp;|&ensp;**/**&ensp;|&ensp;**&**&ensp;|&ensp;**|**&ensp;|&ensp;**>**&ensp;|&ensp;<&ensp;|&ensp;**>=**&ensp;|&ensp;<=&ensp;|&ensp;**%**&ensp;|&ensp;**^**&ensp;|&ensp;**==**&ensp;|&ensp;**!=**<br>
-- **ide**&emsp;:=&emsp;_Identifiers_<br>
+- **ide**&emsp;:=&emsp;Identifiers<br>
 
 > [!TIP]
 > You can refer to OCaml documentation for any doubt, since it should be almost equivalent to this lexic, syntax and semantics.
