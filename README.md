@@ -22,7 +22,7 @@ As in OCaml, functions in MiniCaml are treated as values, so they can be passed 
 
 > [!NOTE]
 > - '(&ensp;&ensp;)' can surround any expression (just one), but they are also necessary to define operations and functional applications, so use them wisely.
-> - 'in', 'rec' and 'ide<sub>1</sub> ... ide<sub>16</sub>' are optional in 'let' declaration, thus they are formatted in italic to lighten the grammar representation.
+> - 'in', 'rec' and 'ide<sub>1</sub> ... ide<sub>16</sub>' are optional in 'let' declaration, thus they are formatted in _italic_ to lighten the grammar representation.
 
 ## Usage
 
