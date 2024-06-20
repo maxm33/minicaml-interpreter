@@ -36,19 +36,15 @@ public class Interpreter {
                 if (l.lis.size() > 0) {
                     if (l.type == null) {
                         Expression first = eval(l.lis.getFirst(), env);
-                        if (first instanceof Int)
-                            l.type = new Int();
-                        else if (first instanceof Bool)
-                            l.type = new Bool();
-                        else if (first instanceof Closure)
-                            l.type = new Closure();
-                        else if (first instanceof RecClosure)
-                            l.type = new RecClosure();
-                        else if (first instanceof Lis)
-                            l.type = new Lis();
-                        else
-                            throw new TypeMismatchException(
+                        switch (first) {
+                            case Int i -> l.type = i;
+                            case Bool b -> l.type = b;
+                            case Closure c -> l.type = c;
+                            case RecClosure rc -> l.type = rc;
+                            case Lis li -> l.type = li;
+                            default -> throw new TypeMismatchException(
                                     "unexpected type '" + first.getClass().getSimpleName() + "' inside list");
+                        }
                     }
                     for (int i = 0; i < l.lis.size(); i++) {
                         Expression element = eval(l.lis.get(i), env);
@@ -63,7 +59,7 @@ public class Interpreter {
                 Int ret_int = new Int();
                 Bool ret_bool = new Bool();
                 typecheck(bop.op, new Symbol());
-                switch (((Symbol) bop.op).value) {
+                switch (bop.op.value) {
                     case "+":
                         typecheck(e1, ret_int);
                         typecheck(e2, ret_int);
@@ -245,7 +241,8 @@ public class Interpreter {
                 Expression list = eval(lop.list, env);
                 typecheck(list, newList);
                 Lis oplis = (Lis) list;
-                switch (lop.operation) {
+                typecheck(lop.op, new Symbol());
+                switch (lop.op.value) {
                     case "cons":
                         Expression element = eval(lop.arg_2, env);
                         if (oplis.type == null)
@@ -350,7 +347,7 @@ public class Interpreter {
                             newList.lis.addFirst(elem);
                         return newList;
                     default:
-                        throw new UnknownCommandException("unknown list operation '" + lop.operation + "'");
+                        throw new UnknownCommandException("unknown list operation '" + lop.op.value + "'");
                 }
             }
             default -> throw new UnknownCommandException(null);

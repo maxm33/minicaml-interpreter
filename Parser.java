@@ -154,8 +154,7 @@ public class Parser {
     private static Expression parseListOp(Queue<Token> tokens) throws WrongSyntaxException {
         String[] s = tokens.remove().value.split("\\.");
         ListOp lop = new ListOp();
-        lop.operation = s[1];
-        switch (lop.operation) {
+        switch (s[1]) {
             case "fold":
                 lop.arg_1 = parseExpression(tokens);
             case "cons":
@@ -171,9 +170,10 @@ public class Parser {
             case "length":
             case "rev":
                 lop.list = parseExpression(tokens);
+                lop.op = new Symbol(s[1]);
                 return lop;
             default:
-                throw new WrongSyntaxException("invalid list operation '" + s[0] + "." + lop.operation + "'");
+                throw new WrongSyntaxException("invalid list operation '" + s[0] + "." + s[1] + "'");
         }
     }
 
