@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Queue;
 import constructs.*;
 import exceptions.*;
-import token.Token;
+import token.*;
 import values.*;
 
 public class Interpreter {
