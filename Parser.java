@@ -3,9 +3,8 @@ import java.util.List;
 import java.util.Queue;
 import constructs.*;
 import exceptions.WrongSyntaxException;
-import token.Token;
-import token.TokenType;
-import types.*;
+import token.*;
+import values.*;
 
 public class Parser {
     private static Expression result;
@@ -30,9 +29,9 @@ public class Parser {
         if (nextToken != null) {
             switch (nextToken.type) {
                 case INT:
-                    return parseInt(tokens.remove());
+                    return parseInt(tokens);
                 case BOOL:
-                    return parseBool(tokens.remove());
+                    return parseBool(tokens);
                 case LET:
                     return parseLet(tokens);
                 case IF:
@@ -40,15 +39,15 @@ public class Parser {
                 case FUN:
                     return parseFunction(tokens);
                 case LPAR:
-                    return parsePar(tokens);
+                    return parseParenthesis(tokens);
                 case LIST_S:
                     return parseList(tokens);
                 case LIST_OP:
-                    return parseListOp(tokens);
+                    return parseListOperation(tokens);
                 case NOT:
-                    return parseNot(tokens);
+                    return parseUnaryOperation(tokens);
                 case IDEN:
-                    return parseIden(tokens.remove());
+                    return parseIdentifier(tokens);
                 default:
                     throw new WrongSyntaxException("unexpected token '" + nextToken.value + "'");
             }
@@ -56,16 +55,16 @@ public class Parser {
             throw new WrongSyntaxException("expected expression but found none");
     }
 
-    private static Int parseInt(Token token) {
-        return new Int(Integer.parseInt(token.value));
+    private static Int parseInt(Queue<Token> tokens) {
+        return new Int(Integer.parseInt(tokens.remove().value));
     }
 
-    private static Bool parseBool(Token token) {
-        return new Bool(Boolean.parseBoolean(token.value));
+    private static Bool parseBool(Queue<Token> tokens) {
+        return new Bool(Boolean.parseBoolean(tokens.remove().value));
     }
 
-    private static Iden parseIden(Token token) {
-        return new Iden(token.value);
+    private static Identifier parseIdentifier(Queue<Token> tokens) {
+        return new Identifier(tokens.remove().value);
     }
 
     private static Expression parseLet(Queue<Token> tokens) throws WrongSyntaxException {
@@ -111,7 +110,7 @@ public class Parser {
     }
 
     private static Expression parseFunction(Queue<Token> tokens) throws WrongSyntaxException {
-        Function fun = new Function();
+        AnonymusFunction fun = new AnonymusFunction();
         parseToken(tokens, new Token(TokenType.FUN, "function"));
         fun.formalParams = parseListOfParams(tokens, new Token(TokenType.ARROW, "->"));
         parseToken(tokens, new Token(TokenType.ARROW, "->"));
@@ -119,12 +118,12 @@ public class Parser {
         return fun;
     }
 
-    private static Expression parsePar(Queue<Token> tokens) throws WrongSyntaxException {
+    private static Expression parseParenthesis(Queue<Token> tokens) throws WrongSyntaxException {
         parseToken(tokens, new Token(TokenType.LPAR, "("));
         Expression firstElem = parseExpression(tokens);
         nextToken = tokens.peek();
         if (nextToken.type == TokenType.SYMB) {
-            Operation bop = new Operation();
+            BinaryOperation bop = new BinaryOperation();
             bop.e1 = firstElem;
             bop.op = parseSymbol(tokens);
             bop.e2 = parseExpression(tokens);
@@ -151,9 +150,9 @@ public class Parser {
         return l;
     }
 
-    private static Expression parseListOp(Queue<Token> tokens) throws WrongSyntaxException {
+    private static Expression parseListOperation(Queue<Token> tokens) throws WrongSyntaxException {
         String[] s = tokens.remove().value.split("\\.");
-        ListOp lop = new ListOp();
+        ListOperation lop = new ListOperation();
         switch (s[1]) {
             case "fold":
                 lop.arg_1 = parseExpression(tokens);
@@ -177,11 +176,12 @@ public class Parser {
         }
     }
 
-    private static Expression parseNot(Queue<Token> tokens) throws WrongSyntaxException {
-        Not not = new Not();
+    private static Expression parseUnaryOperation(Queue<Token> tokens) throws WrongSyntaxException {
+        UnaryOperation uop = new UnaryOperation();
         parseToken(tokens, new Token(TokenType.NOT, "!"));
-        not.arg = parseExpression(tokens);
-        return not;
+        uop.op = new Symbol("!");
+        uop.arg = parseExpression(tokens);
+        return uop;
     }
 
     private static void parseToken(Queue<Token> tokens, Token expected) throws WrongSyntaxException {

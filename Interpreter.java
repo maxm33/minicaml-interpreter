@@ -8,7 +8,7 @@ import java.util.Queue;
 import constructs.*;
 import exceptions.*;
 import token.Token;
-import types.*;
+import values.*;
 
 public class Interpreter {
 
@@ -23,13 +23,13 @@ public class Interpreter {
             case Bool b -> {
                 return b;
             }
-            case Iden id -> {
+            case Identifier id -> {
                 Expression val = lookup(id, env);
                 return val;
             }
-            case Function f -> {
+            case AnonymusFunction f -> {
                 for (Expression param : f.formalParams)
-                    typecheck(param, new Iden());
+                    typecheck(param, new Identifier());
                 return new Closure(f.formalParams, f.body, env);
             }
             case Lis l -> {
@@ -40,7 +40,7 @@ public class Interpreter {
                             case Int i -> l.type = i;
                             case Bool b -> l.type = b;
                             case Closure c -> l.type = c;
-                            case RecClosure rc -> l.type = rc;
+                            case RecursiveClosure rc -> l.type = rc;
                             case Lis li -> l.type = li;
                             default -> throw new TypeMismatchException(
                                     "unexpected type '" + first.getClass().getSimpleName() + "' inside list");
@@ -54,11 +54,10 @@ public class Interpreter {
                 }
                 return l;
             }
-            case Operation bop -> {
+            case BinaryOperation bop -> {
                 Expression e1 = eval(bop.e1, env), e2 = eval(bop.e2, env);
                 Int ret_int = new Int();
                 Bool ret_bool = new Bool();
-                typecheck(bop.op, new Symbol());
                 switch (bop.op.value) {
                     case "+":
                         typecheck(e1, ret_int);
@@ -149,15 +148,20 @@ public class Interpreter {
                                     "unexpected type '" + e1.getClass().getSimpleName() + "' passed to operation !=");
                         return ret_bool;
                     default:
-                        throw new UnknownCommandException("unknown operation '" + ((Symbol) bop.op).value + "'");
+                        throw new UnknownCommandException("unknown operation '" + bop.op.value + "'");
                 }
             }
-            case Not not -> {
-                Expression arg = eval(not.arg, env);
-                Bool ret = new Bool();
-                typecheck(arg, ret);
-                ret.value = !((Bool) arg).value;
-                return ret;
+            case UnaryOperation uop -> {
+                Expression arg = eval(uop.arg, env);
+                switch (uop.op.value) {
+                    case "!":
+                        Bool ret = new Bool();
+                        typecheck(arg, ret);
+                        ret.value = !((Bool) arg).value;
+                        return ret;
+                    default:
+                        throw new UnknownCommandException("unknown operation '" + uop.op.value + "'");
+                }
             }
             case Ifthenelse ifte -> {
                 Expression guard = eval(ifte.guard, env);
@@ -168,15 +172,15 @@ public class Interpreter {
                     return eval(ifte.els, env);
             }
             case Let let -> {
-                typecheck(let.var, new Iden());
+                typecheck(let.var, new Identifier());
                 if (let.params != null) {
-                    Function fun = new Function();
+                    AnonymusFunction fun = new AnonymusFunction();
                     fun.formalParams = let.params;
                     fun.body = let.value;
                     let.value = fun;
                 }
                 Expression value = eval(let.value, env);
-                Binding bin = new Binding((Iden) let.var, value);
+                Binding bin = new Binding((Identifier) let.var, value);
                 // creating a new env for the 'in' scope
                 if (let.body != null) {
                     List<Binding> newEnv = bind(bin, env);
@@ -188,11 +192,11 @@ public class Interpreter {
                 }
             }
             case Letrec letr -> {
-                typecheck(letr.name, new Iden());
+                typecheck(letr.name, new Identifier());
                 for (Expression param : letr.params)
-                    typecheck(param, new Iden());
-                RecClosure closure = new RecClosure((Iden) letr.name, letr.params, letr.fbody, env);
-                Binding bin = new Binding((Iden) letr.name, closure);
+                    typecheck(param, new Identifier());
+                RecursiveClosure closure = new RecursiveClosure((Identifier) letr.name, letr.params, letr.fbody, env);
+                Binding bin = new Binding((Identifier) letr.name, closure);
                 // creating a new env for the 'in' scope
                 if (letr.letbody != null) {
                     List<Binding> newEnv = bind(bin, env);
@@ -214,12 +218,12 @@ public class Interpreter {
                         List<Binding> extFenv = clone(clo.fenv);
                         for (Expression param : clo.params) {
                             Expression aVal = eval(app.actualParams.get(i++), env);
-                            Binding bin = new Binding((Iden) param, aVal);
+                            Binding bin = new Binding((Identifier) param, aVal);
                             extFenv = bind(bin, extFenv);
                         }
                         return eval(clo.body, extFenv);
                     }
-                    case RecClosure rec -> {
+                    case RecursiveClosure rec -> {
                         if (app.actualParams.size() != rec.params.size())
                             throw new WrongSyntaxException(
                                     "functional application parameters do not match the function signature");
@@ -228,7 +232,7 @@ public class Interpreter {
                         extFenv = bind(bin, rec.fenv);
                         for (Expression param : rec.params) {
                             Expression aVal = eval(app.actualParams.get(i++), env);
-                            bin = new Binding((Iden) param, aVal);
+                            bin = new Binding((Identifier) param, aVal);
                             extFenv = bind(bin, extFenv);
                         }
                         return eval(rec.body, extFenv);
@@ -236,12 +240,11 @@ public class Interpreter {
                     default -> throw new TypeMismatchException("not a functional value passed");
                 }
             }
-            case ListOp lop -> {
+            case ListOperation lop -> {
                 Lis newList = new Lis();
                 Expression list = eval(lop.list, env);
                 typecheck(list, newList);
                 Lis oplis = (Lis) list;
-                typecheck(lop.op, new Symbol());
                 switch (lop.op.value) {
                     case "cons":
                         Expression element = eval(lop.arg_2, env);
@@ -366,7 +369,7 @@ public class Interpreter {
         return newEnv;
     }
 
-    private static Expression lookup(Iden iden, List<Binding> env) throws NoBindingException {
+    private static Expression lookup(Identifier iden, List<Binding> env) throws NoBindingException {
         for (int i = env.size() - 1; i >= 0; i--)
             if (env.get(i).var.value.contentEquals(iden.value))
                 return env.get(i).value;
@@ -380,22 +383,22 @@ public class Interpreter {
         return newList;
     }
 
-    private static String printExpression(Expression exp) {
+    private static String printValue(Expression exp) {
         switch (exp) {
             case Int i:
                 return Integer.toString(i.value);
             case Bool b:
                 return Boolean.toString(b.value);
-            case Iden id:
+            case Identifier id:
                 return id.value;
             case Closure c:
                 return "<fun>";
-            case RecClosure r:
+            case RecursiveClosure r:
                 return "<rec>";
             case Lis l:
                 String out = "[";
                 for (Expression e : l.lis)
-                    out = out + printExpression(e) + ",";
+                    out = out + printValue(e) + ",";
                 int index;
                 if ((index = out.lastIndexOf(",")) != -1)
                     out = out.substring(0, index);
@@ -429,7 +432,7 @@ public class Interpreter {
             Expression result = eval(exp, env);
 
             if (result != null)
-                System.out.println("-: " + result.getClass().getSimpleName() + " = " + printExpression(result));
+                System.out.println("-: " + result.getClass().getSimpleName() + " = " + printValue(result));
             else
                 System.out.println("-: null");
         }
