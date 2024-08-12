@@ -1,21 +1,18 @@
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import constructs.*;
 import exceptions.*;
-import token.*;
 import values.*;
 
 public class Interpreter {
 
     @SuppressWarnings("unchecked")
-    public static Expression eval(Expression e, List<Binding> env)
+    public Expression eval(Expression e, List<Binding> env)
             throws ZeroDividerException, UnknownCommandException, TypeMismatchException, NoBindingException,
             WrongSyntaxException {
+        Int ret_int = new Int();
+        Bool ret_bool = new Bool();
         switch (e) {
             case Int i -> {
                 return i;
@@ -56,64 +53,62 @@ public class Interpreter {
             }
             case BinaryOperation bop -> {
                 Expression e1 = eval(bop.e1, env), e2 = eval(bop.e2, env);
-                Int ret_int = new Int();
-                Bool ret_bool = new Bool();
                 switch (bop.op.value) {
                     case "+":
-                        typecheck(e1, ret_int);
-                        typecheck(e2, ret_int);
+                        typecheck(e1, new Int());
+                        typecheck(e2, new Int());
                         ret_int.value = ((Int) e1).value + ((Int) e2).value;
                         return ret_int;
                     case "-":
-                        typecheck(e1, ret_int);
-                        typecheck(e2, ret_int);
+                        typecheck(e1, new Int());
+                        typecheck(e2, new Int());
                         ret_int.value = ((Int) e1).value - ((Int) e2).value;
                         return ret_int;
                     case "*":
-                        typecheck(e1, ret_int);
-                        typecheck(e2, ret_int);
+                        typecheck(e1, new Int());
+                        typecheck(e2, new Int());
                         ret_int.value = ((Int) e1).value * ((Int) e2).value;
                         return ret_int;
                     case "/":
-                        typecheck(e1, ret_int);
-                        typecheck(e2, ret_int);
+                        typecheck(e1, new Int());
+                        typecheck(e2, new Int());
                         if (((Int) e2).value == 0)
                             throw new ZeroDividerException("cannot divide by zero");
                         ret_int.value = ((Int) e1).value / ((Int) e2).value;
                         return ret_int;
                     case "&":
-                        typecheck(e1, ret_bool);
-                        typecheck(e2, ret_bool);
+                        typecheck(e1, new Bool());
+                        typecheck(e2, new Bool());
                         ret_bool.value = ((Bool) e1).value && ((Bool) e2).value;
                         return ret_bool;
                     case "|":
-                        typecheck(e1, ret_bool);
-                        typecheck(e2, ret_bool);
+                        typecheck(e1, new Bool());
+                        typecheck(e2, new Bool());
                         ret_bool.value = ((Bool) e1).value || ((Bool) e2).value;
                         return ret_bool;
                     case ">":
-                        typecheck(e1, ret_int);
-                        typecheck(e2, ret_int);
+                        typecheck(e1, new Int());
+                        typecheck(e2, new Int());
                         ret_bool.value = ((Int) e1).value > ((Int) e2).value;
                         return ret_bool;
                     case "<":
-                        typecheck(e1, ret_int);
-                        typecheck(e2, ret_int);
+                        typecheck(e1, new Int());
+                        typecheck(e2, new Int());
                         ret_bool.value = ((Int) e1).value < ((Int) e2).value;
                         return ret_bool;
                     case ">=":
-                        typecheck(e1, ret_int);
-                        typecheck(e2, ret_int);
+                        typecheck(e1, new Int());
+                        typecheck(e2, new Int());
                         ret_bool.value = ((Int) e1).value >= ((Int) e2).value;
                         return ret_bool;
                     case "<=":
-                        typecheck(e1, ret_int);
-                        typecheck(e2, ret_int);
+                        typecheck(e1, new Int());
+                        typecheck(e2, new Int());
                         ret_bool.value = ((Int) e1).value <= ((Int) e2).value;
                         return ret_bool;
                     case "%":
-                        typecheck(e1, ret_int);
-                        typecheck(e2, ret_int);
+                        typecheck(e1, new Int());
+                        typecheck(e2, new Int());
                         ret_int.value = ((Int) e1).value % ((Int) e2).value;
                         return ret_int;
                     case "^":
@@ -155,10 +150,9 @@ public class Interpreter {
                 Expression arg = eval(uop.arg, env);
                 switch (uop.op.value) {
                     case "!":
-                        Bool ret = new Bool();
-                        typecheck(arg, ret);
-                        ret.value = !((Bool) arg).value;
-                        return ret;
+                        typecheck(arg, new Bool());
+                        ret_bool.value = !((Bool) arg).value;
+                        return ret_bool;
                     default:
                         throw new UnknownCommandException("unknown operation '" + uop.op.value + "'");
                 }
@@ -243,11 +237,11 @@ public class Interpreter {
             case ListOperation lop -> {
                 Lis newList = new Lis();
                 Expression list = eval(lop.list, env);
-                typecheck(list, newList);
+                typecheck(list, new Lis());
                 Lis oplis = (Lis) list;
                 switch (lop.op.value) {
                     case "cons":
-                        Expression element = eval(lop.arg_2, env);
+                        Expression element = eval(lop.arg2, env);
                         if (oplis.type == null)
                             oplis.type = element;
                         else
@@ -271,8 +265,8 @@ public class Interpreter {
                     case "length":
                         return new Int(oplis.lis.size());
                     case "append":
-                        Expression list1 = eval(lop.arg_2, env);
-                        typecheck(list1, newList);
+                        Expression list1 = eval(lop.arg2, env);
+                        typecheck(list1, new Lis());
                         Lis arglis = (Lis) list1;
                         if (!oplis.lis.isEmpty() && !arglis.lis.isEmpty())
                             typecheck(oplis.type, arglis.type);
@@ -286,7 +280,7 @@ public class Interpreter {
                             FunctionalApplication app = new FunctionalApplication();
                             app.actualParams = new ArrayList<Expression>();
                             app.actualParams.add(elem);
-                            app.iden = lop.arg_2;
+                            app.iden = lop.arg2;
                             Expression newElem = eval(app, env);
                             newList.lis.addLast(newElem);
                         }
@@ -296,7 +290,7 @@ public class Interpreter {
                             FunctionalApplication app = new FunctionalApplication();
                             app.actualParams = new ArrayList<Expression>();
                             app.actualParams.add(elem);
-                            app.iden = lop.arg_2;
+                            app.iden = lop.arg2;
                             Expression result = eval(app, env);
                             typecheck(result, new Bool());
                             if (((Bool) result).value == true)
@@ -309,28 +303,28 @@ public class Interpreter {
                             FunctionalApplication app = new FunctionalApplication();
                             app.actualParams = new ArrayList<Expression>();
                             app.actualParams.add(elem);
-                            app.iden = lop.arg_2;
+                            app.iden = lop.arg2;
                             Expression result = eval(app, env);
-                            typecheck(result, ret);
+                            typecheck(result, new Bool());
                             if (((Bool) result).value == true)
                                 ret.value = true;
                         }
                         return ret;
                     case "forAll":
-                        Bool re = new Bool(true);
+                        Bool _ret = new Bool(true);
                         for (Expression elem : oplis.lis) {
                             FunctionalApplication app = new FunctionalApplication();
                             app.actualParams = new ArrayList<Expression>();
                             app.actualParams.add(elem);
-                            app.iden = lop.arg_2;
+                            app.iden = lop.arg2;
                             Expression result = eval(app, env);
-                            typecheck(result, re);
+                            typecheck(result, new Bool());
                             if (((Bool) result).value == false)
-                                re.value = false;
+                                _ret.value = false;
                         }
-                        return re;
+                        return _ret;
                     case "fold":
-                        Expression firstAcc = eval(lop.arg_2, env);
+                        Expression firstAcc = eval(lop.arg2, env);
                         Expression newAcc = null;
                         for (Expression elem : oplis.lis) {
                             FunctionalApplication app = new FunctionalApplication();
@@ -340,7 +334,7 @@ public class Interpreter {
                                 app.actualParams.add(firstAcc);
                             else
                                 app.actualParams.add(newAcc);
-                            app.iden = lop.arg_1;
+                            app.iden = lop.arg1;
                             newAcc = eval(app, env);
                             typecheck(newAcc, firstAcc);
                         }
@@ -357,34 +351,34 @@ public class Interpreter {
         }
     }
 
-    private static void typecheck(Expression actualType, Expression expectedType) throws TypeMismatchException {
+    private void typecheck(Expression actualType, Expression expectedType) throws TypeMismatchException {
         if (!actualType.getClass().equals(expectedType.getClass()))
             throw new TypeMismatchException("expected type '" + expectedType.getClass().getSimpleName()
                     + "' but found type '" + actualType.getClass().getSimpleName() + "'");
     }
 
-    private static List<Binding> bind(Binding bin, List<Binding> env) {
-        List<Binding> newEnv = clone(env);
+    private List<Binding> bind(Binding bin, List<Binding> oldEnv) {
+        List<Binding> newEnv = clone(oldEnv);
         newEnv.add(bin);
         return newEnv;
     }
 
-    private static Expression lookup(Identifier iden, List<Binding> env) throws NoBindingException {
+    private Expression lookup(Identifier iden, List<Binding> env) throws NoBindingException {
         for (int i = env.size() - 1; i >= 0; i--)
             if (env.get(i).var.value.contentEquals(iden.value))
                 return env.get(i).value;
         throw new NoBindingException("variable '" + iden.value + "' is not bound in scope");
     }
 
-    private static List<Binding> clone(List<Binding> oldList) {
+    private List<Binding> clone(List<Binding> oldList) {
         List<Binding> newList = new ArrayList<Binding>();
         for (Binding bin : oldList)
             newList.add(bin);
         return newList;
     }
 
-    private static String printValue(Expression exp) {
-        switch (exp) {
+    public String printValue(Expression e) {
+        switch (e) {
             case Int i:
                 return Integer.toString(i.value);
             case Bool b:
@@ -397,44 +391,14 @@ public class Interpreter {
                 return "<rec>";
             case Lis l:
                 String out = "[";
-                for (Expression e : l.lis)
-                    out = out + printValue(e) + ",";
+                for (Expression element : l.lis)
+                    out = out + printValue(element) + ",";
                 int index;
                 if ((index = out.lastIndexOf(",")) != -1)
                     out = out.substring(0, index);
                 return out + "]";
             default:
                 return null;
-        }
-    }
-
-    public static void main(String[] args)
-            throws IllegalTokenException, WrongSyntaxException, ZeroDividerException,
-            UnknownCommandException, TypeMismatchException, NoBindingException, IOException {
-        if (args.length < 1) {
-            System.err.println("\nNo path was provided.\nUsage: java Interpreter <path-to-file>");
-            return;
-        }
-        if (!args[0].endsWith(".ml")) {
-            System.err.println("\nFile is not a .ml file");
-            return;
-        }
-        String program = Files.readString(Paths.get(args[0]));
-        String[] blocks = program.split("(?<=\\s+;;)");
-        List<Binding> env = new ArrayList<Binding>();
-
-        System.out.println();
-        for (String block : blocks) {
-            System.out.println(block + "\n");
-
-            Queue<Token> tokens = Lexer.tokenize(block);
-            Expression exp = Parser.parse(tokens);
-            Expression result = eval(exp, env);
-
-            if (result != null)
-                System.out.println("-: " + result.getClass().getSimpleName() + " = " + printValue(result));
-            else
-                System.out.println("-: null");
         }
     }
 }

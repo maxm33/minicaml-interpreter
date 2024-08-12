@@ -1,20 +1,27 @@
 import java.util.LinkedList;
 import java.util.Queue;
+import token.*;
 import exceptions.IllegalTokenException;
-import token.Token;
-import token.TokenType;
 
 public class Lexer {
-    private static Queue<Token> tokens = new LinkedList<Token>();
+    private String program;
+    private Queue<Token> tokens = new LinkedList<Token>();
 
-    public static Queue<Token> tokenize(String input) throws IllegalTokenException {
-        String[] words = input.split("\\s+|,");
-        for (String word : words)
-            matchToken(word);
+    public void setInput(String input) {
+        program = input;
+    }
+
+    public Queue<Token> getResult() {
         return tokens;
     }
 
-    public static void matchToken(String word) throws IllegalTokenException {
+    public void tokenize() throws IllegalTokenException {
+        String[] words = program.split("\\s+|,");
+        for (String word : words)
+            matchToken(word);
+    }
+
+    private void matchToken(String word) throws IllegalTokenException {
         if (word.isBlank())
             return;
         else if (word.matches("-[0-9]+|[0-9]+"))
@@ -93,6 +100,7 @@ public class Lexer {
         else if (word.matches("[a-z]\\w*"))
             tokens.add(new Token(TokenType.IDEN, word));
         else
-            throw new IllegalTokenException("illegal token '" + word + "' detected. Spacing in between might help.");
+            throw new IllegalTokenException(
+                    "illegal token '" + word + "' detected. Spacing in between might resolve the issue.");
     }
 }
