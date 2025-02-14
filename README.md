@@ -61,7 +61,7 @@ java Main <path-to-file>
 
 ## Example
 
-The compilation of the available test through the command `java Main test/test.ml` returns the following:
+The compilation of the available test, through the command `java Main test/test.ml`, returns the following:
 
 <br>
 
