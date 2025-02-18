@@ -1,11 +1,11 @@
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import constructs.Binding;
 import constructs.Expression;
 import exceptions.*;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args)
@@ -22,7 +22,7 @@ public class Main {
 
         String program = Files.readString(Paths.get(args[0]));
         String[] blocks = program.split("(?<=\\s+;;)");
-        List<Binding> env = new ArrayList<Binding>();
+        List<Binding> env = new ArrayList<>();
 
         Lexer lexer = new Lexer();
         Parser parser = new Parser();

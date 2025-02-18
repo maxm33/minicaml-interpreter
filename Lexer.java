@@ -1,11 +1,11 @@
+import exceptions.IllegalTokenException;
 import java.util.LinkedList;
 import java.util.Queue;
 import token.*;
-import exceptions.IllegalTokenException;
 
 public class Lexer {
     private String program;
-    private Queue<Token> tokens = new LinkedList<Token>();
+    private final Queue<Token> tokens = new LinkedList<>();
 
     public void setInput(String input) {
         program = input;
@@ -22,9 +22,8 @@ public class Lexer {
     }
 
     private void matchToken(String word) throws IllegalTokenException {
-        if (word.isBlank())
-            return;
-        else if (word.matches("-[0-9]+|[0-9]+"))
+        if (word.isBlank()) {
+        } else if (word.matches("-[0-9]+|[0-9]+"))
             tokens.add(new Token(TokenType.INT, word));
         else if (word.matches("true|false"))
             tokens.add(new Token(TokenType.BOOL, word));

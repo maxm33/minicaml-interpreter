@@ -1,10 +1,9 @@
 package values;
 
+import constructs.Expression;
 import java.util.LinkedList;
 
-import constructs.Expression;
-
 public class Lis implements Expression {
-    public LinkedList<Expression> lis = new LinkedList<Expression>();
+    public LinkedList<Expression> lis = new LinkedList<>();
     public Expression type;
 }

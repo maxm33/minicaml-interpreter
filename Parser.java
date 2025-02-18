@@ -1,10 +1,10 @@
+import constructs.*;
+import exceptions.WrongSyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import constructs.*;
 import token.*;
 import values.*;
-import exceptions.WrongSyntaxException;
 
 public class Parser {
     private Queue<Token> tokens;
@@ -24,7 +24,7 @@ public class Parser {
             throw new WrongSyntaxException("no tokens found");
         result = parseExpression();
         parseToken(new Token(TokenType.END_BLOCK, ";;"));
-        if (tokens.size() > 0) {
+        if (!tokens.isEmpty()) {
             String s = new String();
             for (Token t : tokens)
                 s = s + t.value + " ";
@@ -36,28 +36,37 @@ public class Parser {
         nextToken = tokens.peek();
         if (nextToken != null) {
             switch (nextToken.type) {
-                case INT:
+                case INT -> {
                     return parseInt();
-                case BOOL:
+                }
+                case BOOL -> {
                     return parseBool();
-                case LET:
+                }
+                case LET -> {
                     return parseLet();
-                case IF:
+                }
+                case IF -> {
                     return parseIf();
-                case FUN:
+                }
+                case FUN -> {
                     return parseFunction();
-                case LPAR:
+                }
+                case LPAR -> {
                     return parseParenthesis();
-                case LIST_S:
+                }
+                case LIST_S -> {
                     return parseList();
-                case LIST_OP:
+                }
+                case LIST_OP -> {
                     return parseListOperation();
-                case NOT:
+                }
+                case NOT -> {
                     return parseUnaryOperation();
-                case IDEN:
+                }
+                case IDEN -> {
                     return parseIdentifier();
-                default:
-                    throw new WrongSyntaxException("unexpected token '" + nextToken.value + "'");
+                }
+                default -> throw new WrongSyntaxException("unexpected token '" + nextToken.value + "'");
             }
         } else
             throw new WrongSyntaxException("expected expression but found none");
@@ -203,9 +212,9 @@ public class Parser {
 
     private List<Expression> parseListOfParams(Token stopAt)
             throws WrongSyntaxException {
-        List<Expression> params = new ArrayList<Expression>();
+        List<Expression> params = new ArrayList<>();
         while (tokens.peek().type != stopAt.type) {
-            if (params.size() >= 16)
+            if (params.size() > 16)
                 throw new WrongSyntaxException("too many parameters passed to function");
             else {
                 try {
@@ -215,7 +224,7 @@ public class Parser {
                 }
             }
         }
-        if (params.size() == 0)
+        if (params.isEmpty())
             throw new WrongSyntaxException("no parameters passed to function");
         return params;
     }
@@ -225,23 +234,10 @@ public class Parser {
         if (nextToken != null) {
             tokens.remove();
             switch (nextToken.value) {
-                case "+":
-                case "-":
-                case "*":
-                case "/":
-                case "&":
-                case "|":
-                case ">":
-                case "<":
-                case ">=":
-                case "<=":
-                case "%":
-                case "^":
-                case "==":
-                case "!=":
+                case "+", "-", "*", "/", "&", "|", ">", "<", ">=", "<=", "%", "^", "==", "!=" -> {
                     return new Symbol(nextToken.value);
-                default:
-                    throw new WrongSyntaxException("unexpected operation symbol '" + nextToken.value + "'");
+                }
+                default -> throw new WrongSyntaxException("unexpected operation symbol '" + nextToken.value + "'");
             }
         } else
             throw new WrongSyntaxException("expected operation symbol but found none");
